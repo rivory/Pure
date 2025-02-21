@@ -37,6 +37,9 @@ npx shadcn@latest add button
 - [X] Add and Retrieve Connection list 
 - [X] Test connection when adding it
 - [X] basic error handling to show as Toaster
+- [X] cold storage connections info
+    - [ ] encrypt password 
+    - [ ] find a better path where to store
 - [ ] List Db for active connection 
 - [ ] List table from DB for active DB
 - [ ] Run Query and get results 
