@@ -25,6 +25,11 @@ func NewConnectionService() *ConnectionService {
 	return &ConnectionService{}
 }
 
+func (c *ConnectionService) Startup(ctx context.Context) {
+	c.ctx = ctx
+	c.read()
+}
+
 func TestConnection(ctx context.Context, conn model.Connection) error {
 	connUrl := fmt.Sprintf("postgres://%s:%s@%s:%d", conn.Username, conn.Password, conn.Host, conn.Port)
 
@@ -37,11 +42,6 @@ func TestConnection(ctx context.Context, conn model.Connection) error {
 	defer c.Close(ctx)
 
 	return nil
-}
-
-func (c *ConnectionService) Startup(ctx context.Context) {
-	c.ctx = ctx
-	c.read()
 }
 
 func (c *ConnectionService) ListConnections() []model.Connection {
@@ -72,6 +72,9 @@ func (c *ConnectionService) AddConnection(name, username, password, host string,
 func (c *ConnectionService) read() error {
 	fd, err := os.Open(FILE_STORAGE_PATH)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
 		return err
 	}
 
