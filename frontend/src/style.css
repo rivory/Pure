@@ -1,6 +1,7 @@
 @import "tailwindcss";
-@config "../tailwind.config.js";
 
+@custom-variant dark (&:is(.dark *));
+@config "../tailwind.config.js";
 
 /* @font-face {
     font-family: "Nunito";
@@ -109,8 +110,16 @@
         @apply overflow-x-hidden;
     }
 
-
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
     }
 }
