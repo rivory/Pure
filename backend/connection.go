@@ -112,3 +112,59 @@ func (c *ConnectionService) save() error {
 
 	return nil
 }
+
+type QueryResult struct {
+	Columns []string        `json:"columns"`
+	Rows    [][]interface{} `json:"rows"`
+}
+
+func (c *ConnectionService) Query(connUUID string, query string) (*QueryResult, error) {
+	// Find the connection
+	var conn model.Connection
+	for _, c := range c.Conections {
+		if c.Uuid.String() == connUUID {
+			conn = c
+			break
+		}
+	}
+	if conn.Uuid.String() == "" {
+		return nil, fmt.Errorf("connection not found")
+	}
+
+	// Connect to database
+	connUrl := fmt.Sprintf("postgres://%s:%s@%s:%d", conn.Username, conn.Password, conn.Host, conn.Port)
+	db, err := pgx.Connect(c.ctx, connUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close(c.ctx)
+
+	// Execute query
+	rows, err := db.Query(c.ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Get column descriptions
+	fieldDescriptions := rows.FieldDescriptions()
+	columns := make([]string, len(fieldDescriptions))
+	for i, fd := range fieldDescriptions {
+		columns[i] = string(fd.Name)
+	}
+
+	// Get all rows
+	var result [][]interface{}
+	for rows.Next() {
+		values, err := rows.Values()
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, values)
+	}
+
+	return &QueryResult{
+		Columns: columns,
+		Rows:    result,
+	}, nil
+}
