@@ -45,3 +45,7 @@ func main() {
 		println("Error:", err.Error())
 	}
 }
+
+// func (a *App) Query(connUUID string, query string) (*backend.QueryResult, error) {
+// 	return a.connService.Query(connUUID, query)
+// }

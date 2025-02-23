@@ -22,6 +22,7 @@ import {
 import { cn } from '@/lib/utils'
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
+import { QueryInterface } from "@/components/query-interface"
 
 
 
@@ -30,6 +31,7 @@ import { useToast } from "@/hooks/use-toast"
 export default function Page() {
     const [dbs, setDbs] = useState(Array<model.Connection>)
     const { toast } = useToast()
+    const [selectedConnection, setSelectedConnection] = useState<string>()
 
     function refreshDB() {
         ListConnections().then((result) => {
@@ -50,9 +52,15 @@ export default function Page() {
     }, [])
 
 
+    console.log("selectedConnection", selectedConnection)
+
     return (
         <SidebarProvider>
-            <AppSidebar dbs={dbs} refreshDB={refreshDB} />
+            <AppSidebar 
+                dbs={dbs} 
+                refreshDB={refreshDB} 
+                onSelectConnection={setSelectedConnection}
+            />
             <div
                 id='content'
                 className={cn(
@@ -102,7 +110,9 @@ export default function Page() {
                             <div className="aspect-video rounded-xl bg-muted/50" />
                             <div className="aspect-video rounded-xl bg-muted/50" />
                         </div>
-                        <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+                        <div className="flex-1 rounded-xl bg-muted/50 md:min-h-min">
+                            <QueryInterface selectedConnection={selectedConnection} />
+                        </div>
                     </div>
 
                 </SidebarInset>

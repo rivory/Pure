@@ -14,6 +14,10 @@ export function ListConnections() {
   return window['go']['main']['App']['ListConnections']();
 }
 
+export function Query(arg1, arg2) {
+  return window['go']['main']['App']['Query'](arg1, arg2);
+}
+
 export function Startup(arg1) {
   return window['go']['main']['App']['Startup'](arg1);
 }
