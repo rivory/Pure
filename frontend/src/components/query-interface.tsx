@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Query } from "../../wailsjs/go/main/App"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import CodeMirror from '@uiw/react-codemirror'
+import { sql } from '@codemirror/lang-sql'
 import {
     Table,
     TableBody,
@@ -44,16 +45,42 @@ export function QueryInterface({ selectedConnection }: QueryInterfaceProps) {
         }
     }
 
-    console.log("results", results)
     return (
         <div className="flex flex-col gap-4 p-4">
             <div className="flex gap-2">
-                <Textarea 
-                    value={queryText}
-                    onChange={(e) => setQueryText(e.target.value)}
-                    placeholder="Enter your SQL query here..."
-                    className="font-mono"
-                />
+                <div className="flex-grow">
+                    <CodeMirror
+                        value={queryText}
+                        height="200px"
+                        extensions={[sql()]}
+                        onChange={(value) => setQueryText(value)}
+                        className="border rounded-md"
+                        theme="dark"
+                        basicSetup={{
+                            lineNumbers: true,
+                            highlightActiveLineGutter: true,
+                            highlightSpecialChars: true,
+                            foldGutter: true,
+                            dropCursor: true,
+                            allowMultipleSelections: true,
+                            indentOnInput: true,
+                            bracketMatching: true,
+                            closeBrackets: true,
+                            autocompletion: true,
+                            rectangularSelection: true,
+                            crosshairCursor: true,
+                            highlightActiveLine: true,
+                            highlightSelectionMatches: true,
+                            closeBracketsKeymap: true,
+                            defaultKeymap: true,
+                            searchKeymap: true,
+                            historyKeymap: true,
+                            foldKeymap: true,
+                            completionKeymap: true,
+                            lintKeymap: true,
+                        }}
+                    />
+                </div>
                 <Button onClick={handleQuery}>Run Query</Button>
             </div>
             
@@ -68,13 +95,13 @@ export function QueryInterface({ selectedConnection }: QueryInterfaceProps) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {/* {results.rows.map((row, i) => (
+                            {results?.rows?.map((row, i) => (
                                 <TableRow key={i}>
                                     {row.map((cell, j) => (
                                         <TableCell key={j}>{String(cell)}</TableCell>
                                     ))}
                                 </TableRow>
-                            ))} */}
+                            ))}
                         </TableBody>
                     </Table>
                 </div>
