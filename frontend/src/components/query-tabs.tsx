@@ -20,32 +20,31 @@ interface Tab {
 
 interface QueryTabsProps {
   selectedConnection?: string
+  activeTab: string
+  onActiveTabChange: (tabId: string) => void
+  tabs: Tab[]
+  onTabsChange: (tabs: Tab[]) => void
 }
 
-export function QueryTabs({ selectedConnection }: QueryTabsProps) {
-  const [tabs, setTabs] = useState<Tab[]>([
-    { 
-      id: "1", 
-      title: "Query 1",
-      queryState: {
-        queryText: "",
-        results: null
-      }
-    }
-  ])
-  const [activeTab, setActiveTab] = useState("1")
-
+export function QueryTabs({ 
+  selectedConnection, 
+  activeTab,
+  onActiveTabChange,
+  tabs,
+  onTabsChange
+}: QueryTabsProps) {
   const addTab = () => {
     const newId = String(tabs.length + 1)
-    setTabs([...tabs, { 
+    const newTitle = `Query ${newId}`
+    onTabsChange([...tabs, { 
       id: newId, 
-      title: "Query " + newId,
+      title: newTitle,
       queryState: {
         queryText: "",
         results: null
       }
     }])
-    setActiveTab(newId)
+    onActiveTabChange(newId)
   }
 
   const closeTab = (tabId: string, event: React.MouseEvent) => {
@@ -53,23 +52,23 @@ export function QueryTabs({ selectedConnection }: QueryTabsProps) {
     if (tabs.length === 1) return
 
     const newTabs = tabs.filter(tab => tab.id !== tabId)
-    setTabs(newTabs)
+    onTabsChange(newTabs)
     
     if (tabId === activeTab) {
-      setActiveTab(newTabs[newTabs.length - 1].id)
+      onActiveTabChange(newTabs[newTabs.length - 1].id)
     }
   }
 
   const updateTabState = (tabId: string, newState: QueryState) => {
-    setTabs(tabs.map(tab => 
+    onTabsChange(tabs.map(tab => 
       tab.id === tabId 
         ? { ...tab, queryState: newState }
         : tab
     ))
   }
-  console.log("tabs", tabs)
+
   return (
-    <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+    <Tabs.Root value={activeTab} onValueChange={onActiveTabChange}>
       <Box className="flex items-center border-b">
         <Tabs.List className="flex-1">
           {tabs.map(tab => (
@@ -78,7 +77,7 @@ export function QueryTabs({ selectedConnection }: QueryTabsProps) {
               value={tab.id}
               className="group relative"
             >
-              {tab.title}
+              {tab.queryState.queryText || tab.title}
               {tabs.length > 1 && (
                 <Button
                   variant="ghost"
@@ -114,3 +113,33 @@ export function QueryTabs({ selectedConnection }: QueryTabsProps) {
     </Tabs.Root>
   )
 } 
+
+function removeDuplicateSubstring(str) {
+  // Longueur maximale possible du duplicata (moitié de la chaîne)
+  const maxLength = Math.floor(str.length / 2);
+  
+  // Parcourir toutes les longueurs possibles de duplicata
+  for (let len = maxLength; len > 0; len--) {
+    // Vérifier si la première moitié correspond à la seconde moitié
+    if (str.length % len === 0) {
+      const pattern = str.substring(0, len);
+      let isDuplicate = true;
+      
+      // Vérifier si le motif se répète dans toute la chaîne
+      for (let i = len; i < str.length; i += len) {
+        if (str.substring(i, i + len) !== pattern) {
+          isDuplicate = false;
+          break;
+        }
+      }
+      
+      // Si un duplicata est trouvé, retourner le motif
+      if (isDuplicate) {
+        return pattern;
+      }
+    }
+  }
+  
+  // Aucun duplicata trouvé, retourner la chaîne originale
+  return str;
+}

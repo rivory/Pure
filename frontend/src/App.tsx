@@ -2,20 +2,51 @@
 
 import { useState, useEffect } from "react"
 import { model } from "../wailsjs/go/models"
-import { ListConnections } from "../wailsjs/go/main/App"
+import { ListConnections, GetTableInfo } from "../wailsjs/go/main/App"
 import { AppSidebar } from "@/components/sidebar"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { Sidebar, SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
 import { QueryTabs } from "@/components/query-tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { TableInfo } from "@/types/table-info"
 
 export default function Page() {
 	const [dbs, setDbs] = useState(Array<model.Connection>)
 	const { toast } = useToast()
 	const [selectedConnection, setSelectedConnection] = useState<string>()
+	const [activeTab, setActiveTab] = useState("1")
+	const [tabs, setTabs] = useState([{ 
+		id: "1", 
+		title: "Query 1",
+		queryState: {
+			queryText: "",
+			results: null
+		}
+	}])
+	const [tables, setTables] = useState<TableInfo[]>([])
+
+	useEffect(() => {
+		if (selectedConnection) {
+			loadTableInfo()
+		}
+	}, [selectedConnection])
+
+	const loadTableInfo = async () => {
+		if (!selectedConnection) return
+		try {
+			const info = await GetTableInfo(selectedConnection)
+			setTables(info)
+			if (info.length > 0) {
+				setActiveTab(info[0].name)
+			}
+		} catch (err) {
+			console.error("Failed to load table info", err)
+		}
+	}
 
 	function refreshDB() {
 		ListConnections()
@@ -73,38 +104,43 @@ export default function Page() {
 								<BreadcrumbList>
 									<BreadcrumbItem className="hidden md:block">
 										<BreadcrumbLink href="#">
-											Building Your Application
+											Queries
 										</BreadcrumbLink>
 									</BreadcrumbItem>
 									<BreadcrumbSeparator className="hidden md:block" />
 									<BreadcrumbItem>
-										<BreadcrumbPage>Data Fetching</BreadcrumbPage>
+										<Select 
+											value={activeTab}
+											onValueChange={setActiveTab}
+										>
+											<SelectTrigger className="h-8 w-[200px]">
+												<SelectValue placeholder="Select a query" />
+											</SelectTrigger>
+											<SelectContent>
+												{tabs.map((tab) => (
+													<SelectItem 
+														key={tab.id} 
+														value={tab.id}
+													>
+														{tab.title}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
 									</BreadcrumbItem>
 								</BreadcrumbList>
 							</Breadcrumb>
 						</div>
 					</header>
 					<div className="flex flex-1 flex-col gap-4 p-2 pt-0">
-						{/* <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-							<div className="aspect-video rounded-xl bg-muted/50">
-								<h1>Db list</h1>
-								<ul>
-									{dbs === null || dbs.length === 0 ? (
-										<h2>There is no DB added.</h2>
-									) : (
-										dbs.map((db) => (
-											<li key={db.host}>
-												<b>{db.host}</b> -- {db.username}
-											</li>
-										))
-									)}
-								</ul>
-							</div>
-							<div className="aspect-video rounded-xl bg-muted/50" />
-							<div className="aspect-video rounded-xl bg-muted/50" />
-						</div> */}
 						<div className="flex-1 rounded-xl bg-muted/50 md:min-h-min">
-							<QueryTabs selectedConnection={selectedConnection} />
+							<QueryTabs 
+								selectedConnection={selectedConnection}
+								activeTab={activeTab}
+								onActiveTabChange={setActiveTab}
+								tabs={tabs}
+								onTabsChange={setTabs}
+							/>
 						</div>
 					</div>
 				</SidebarInset>

@@ -13,6 +13,7 @@ import { useTheme } from "@/contexts/theme-context"
 
 interface QueryInterfaceProps {
 	readonly selectedConnection?: string
+	readonly selectedTable?: string
 	readonly initialState?: {
 		queryText: string
 		results: {
@@ -31,6 +32,7 @@ interface QueryInterfaceProps {
 
 export function QueryInterface({ 
 	selectedConnection,
+	selectedTable,
 	initialState,
 	onStateChange 
 }: QueryInterfaceProps) {
