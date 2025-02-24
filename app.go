@@ -49,11 +49,3 @@ func (a *App) Greet(name string) string {
 
 // 	return nil
 // }
-
-func (a *App) ListTables(connUUID string) ([]string, error) {
-	return a.ConnectionService.ListTables(connUUID)
-}
-
-func (a *App) GetTableInfo(connUUID string) ([]backend.TableInfo, error) {
-	return a.ConnectionService.GetTableInfo(connUUID)
-}

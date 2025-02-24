@@ -9,6 +9,7 @@ import { autocompletion, CompletionContext, startCompletion } from "@codemirror/
 import { keymap } from "@codemirror/view"
 import { createSqlCompletions } from "@/lib/sql-completions"
 import { TableInfo } from "@/types/table-info"
+import { useTheme } from "@/contexts/theme-context"
 
 interface QueryInterfaceProps {
 	readonly selectedConnection?: string
@@ -23,6 +24,7 @@ export function QueryInterface({ selectedConnection }: QueryInterfaceProps) {
 	const [historyIndex, setHistoryIndex] = useState(-1)
 	const [tables, setTables] = useState<string[]>([])
 	const [tableInfo, setTableInfo] = useState<TableInfo[]>([])
+	const { theme } = useTheme()
 
 	useEffect(() => {
 		if (selectedConnection) {
@@ -114,7 +116,7 @@ export function QueryInterface({ selectedConnection }: QueryInterfaceProps) {
 						onChange={(value) => setQueryText(value)}
 						onKeyDown={handleKeyDown}
 						className="border rounded-md"
-						theme="dark"
+						theme={theme === 'dark' ? 'dark' : 'light'}
 						basicSetup={{
 							lineNumbers: true,
 							highlightActiveLineGutter: true,
