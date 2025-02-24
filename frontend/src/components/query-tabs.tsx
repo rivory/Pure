@@ -12,7 +12,7 @@ interface QueryState {
   } | null
 }
 
-interface Tab {
+export interface Tab {
   id: string
   title: string
   queryState: QueryState
@@ -113,33 +113,3 @@ export function QueryTabs({
     </Tabs.Root>
   )
 } 
-
-function removeDuplicateSubstring(str) {
-  // Longueur maximale possible du duplicata (moitié de la chaîne)
-  const maxLength = Math.floor(str.length / 2);
-  
-  // Parcourir toutes les longueurs possibles de duplicata
-  for (let len = maxLength; len > 0; len--) {
-    // Vérifier si la première moitié correspond à la seconde moitié
-    if (str.length % len === 0) {
-      const pattern = str.substring(0, len);
-      let isDuplicate = true;
-      
-      // Vérifier si le motif se répète dans toute la chaîne
-      for (let i = len; i < str.length; i += len) {
-        if (str.substring(i, i + len) !== pattern) {
-          isDuplicate = false;
-          break;
-        }
-      }
-      
-      // Si un duplicata est trouvé, retourner le motif
-      if (isDuplicate) {
-        return pattern;
-      }
-    }
-  }
-  
-  // Aucun duplicata trouvé, retourner la chaîne originale
-  return str;
-}

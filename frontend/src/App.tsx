@@ -13,13 +13,14 @@ import { useToast } from "@/hooks/use-toast"
 import { QueryTabs } from "@/components/query-tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TableInfo } from "@/types/table-info"
+import type { Tab } from "@/components/query-tabs"
 
 export default function Page() {
 	const [dbs, setDbs] = useState(Array<model.Connection>)
 	const { toast } = useToast()
 	const [selectedConnection, setSelectedConnection] = useState<string>()
 	const [activeTab, setActiveTab] = useState("1")
-	const [tabs, setTabs] = useState([{ 
+	const [tabs, setTabs] = useState<Tab[]>([{ 
 		id: "1", 
 		title: "Query 1",
 		queryState: {
@@ -139,7 +140,7 @@ export default function Page() {
 								activeTab={activeTab}
 								onActiveTabChange={setActiveTab}
 								tabs={tabs}
-								onTabsChange={setTabs}
+								onTabsChange={(newTabs) => setTabs(newTabs)}
 							/>
 						</div>
 					</div>
