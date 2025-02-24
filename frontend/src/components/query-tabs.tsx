@@ -24,6 +24,7 @@ interface QueryTabsProps {
   onActiveTabChange: (tabId: string) => void
   tabs: Tab[]
   onTabsChange: (tabs: Tab[]) => void
+  onAddTab?: () => void
 }
 
 export function QueryTabs({ 
@@ -31,20 +32,25 @@ export function QueryTabs({
   activeTab,
   onActiveTabChange,
   tabs,
-  onTabsChange
+  onTabsChange,
+  onAddTab
 }: QueryTabsProps) {
   const addTab = () => {
-    const newId = String(tabs.length + 1)
-    const newTitle = `Query ${newId}`
-    onTabsChange([...tabs, { 
-      id: newId, 
-      title: newTitle,
-      queryState: {
-        queryText: "",
-        results: null
-      }
-    }])
-    onActiveTabChange(newId)
+    if (onAddTab) {
+      onAddTab()
+    } else {
+      const newId = String(tabs.length + 1)
+      const newTitle = `Query ${newId}`
+      onTabsChange([...tabs, { 
+        id: newId, 
+        title: newTitle,
+        queryState: {
+          queryText: "",
+          results: null
+        }
+      }])
+      onActiveTabChange(newId)
+    }
   }
 
   const closeTab = (tabId: string, event: React.MouseEvent) => {
