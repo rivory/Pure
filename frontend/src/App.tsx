@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { model } from "../wailsjs/go/models"
 import { ListConnections, GetTableInfo } from "../wailsjs/go/main/App"
 import { AppSidebar } from "@/components/sidebar"
@@ -29,6 +29,40 @@ export default function Page() {
 		}
 	}])
 	const [tables, setTables] = useState<TableInfo[]>([])
+
+	// Fonction pour ajouter un nouvel onglet
+	const addNewTab = useCallback(() => {
+		const newId = String(tabs.length + 1)
+		const newTitle = `Query ${newId}`
+		setTabs((prevTabs) => [...prevTabs, { 
+			id: newId, 
+			title: newTitle,
+			queryState: {
+				queryText: "",
+				results: null
+			}
+		}])
+		setActiveTab(newId)
+	}, [tabs.length])
+
+	// Gestionnaire d'événements pour le raccourci Cmd+T
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			// Cmd+T sur Mac (ou Ctrl+T sur Windows/Linux)
+			if ((e.metaKey || e.ctrlKey) && e.key === 't') {
+				e.preventDefault() // Empêcher le comportement par défaut du navigateur
+				addNewTab()
+			}
+		}
+
+		// Ajouter l'écouteur d'événement
+		window.addEventListener('keydown', handleKeyDown)
+
+		// Supprimer l'écouteur d'événement à la destruction du composant
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown)
+		}
+	}, [addNewTab])
 
 	useEffect(() => {
 		if (selectedConnection) {
@@ -141,6 +175,7 @@ export default function Page() {
 								onActiveTabChange={setActiveTab}
 								tabs={tabs}
 								onTabsChange={(newTabs) => setTabs(newTabs)}
+								onAddTab={addNewTab}
 							/>
 						</div>
 					</div>
