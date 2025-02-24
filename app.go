@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"pureSQL/backend"
 )
 
@@ -28,8 +29,12 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) shutdown(ctx context.Context) {
+	// kill the active connection at shutdown
 	if a.ActiveConnection != nil && a.ActiveConnection.Conn != nil {
-		a.ActiveConnection.Conn.Close(ctx)
+		err := a.ActiveConnection.Conn.Close(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
