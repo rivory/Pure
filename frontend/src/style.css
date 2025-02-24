@@ -123,3 +123,27 @@
     @apply bg-background text-foreground;
     }
 }
+
+.rt-TabsTrigger {
+  padding: 0.5rem 2rem;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rt-TabsTrigger[data-state="active"] {
+  border-bottom-color: var(--accent-9);
+  font-weight: 500;
+}
+
+.rt-TabsTrigger:hover {
+  background-color: var(--accent-3);
+}
+
+.rt-TabsList {
+  border-bottom: 1px solid var(--accent-6);
+}
+
+.rt-TabsContent {
+  outline: none;
+}

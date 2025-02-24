@@ -10,7 +10,7 @@ import { Sidebar, SidebarInset, SidebarProvider, SidebarTrigger } from "@/compon
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
-import { QueryInterface } from "@/components/query-interface"
+import { QueryTabs } from "@/components/query-tabs"
 
 export default function Page() {
 	const [dbs, setDbs] = useState(Array<model.Connection>)
@@ -85,7 +85,7 @@ export default function Page() {
 						</div>
 					</header>
 					<div className="flex flex-1 flex-col gap-4 p-2 pt-0">
-						<div className="grid auto-rows-min gap-4 md:grid-cols-3">
+						{/* <div className="grid auto-rows-min gap-4 md:grid-cols-3">
 							<div className="aspect-video rounded-xl bg-muted/50">
 								<h1>Db list</h1>
 								<ul>
@@ -102,9 +102,9 @@ export default function Page() {
 							</div>
 							<div className="aspect-video rounded-xl bg-muted/50" />
 							<div className="aspect-video rounded-xl bg-muted/50" />
-						</div>
+						</div> */}
 						<div className="flex-1 rounded-xl bg-muted/50 md:min-h-min">
-							<QueryInterface selectedConnection={selectedConnection} />
+							<QueryTabs selectedConnection={selectedConnection} />
 						</div>
 					</div>
 				</SidebarInset>

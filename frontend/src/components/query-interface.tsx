@@ -13,14 +13,31 @@ import { useTheme } from "@/contexts/theme-context"
 
 interface QueryInterfaceProps {
 	readonly selectedConnection?: string
+	readonly initialState?: {
+		queryText: string
+		results: {
+			columns: string[]
+			rows: any[][]
+		} | null
+	}
+	readonly onStateChange?: (state: {
+		queryText: string
+		results: {
+			columns: string[]
+			rows: any[][]
+		} | null
+	}) => void
 }
 
-export function QueryInterface({ selectedConnection }: QueryInterfaceProps) {
-	const [queryText, setQueryText] = useState("")
-	const [results, setResults] = useState<{ columns: string[]; rows: any[][] } | null>(null)
+export function QueryInterface({ 
+	selectedConnection,
+	initialState,
+	onStateChange 
+}: QueryInterfaceProps) {
+	const [queryText, setQueryText] = useState(initialState?.queryText ?? "")
+	const [results, setResults] = useState(initialState?.results ?? null)
 	const { toast } = useToast()
 	const [queryHistory, setQueryHistory] = useState<string[]>([])
-	// @ts-ignore - historyIndex is used in event handlers
 	const [historyIndex, setHistoryIndex] = useState(-1)
 	const [tables, setTables] = useState<string[]>([])
 	const [tableInfo, setTableInfo] = useState<TableInfo[]>([])
@@ -32,6 +49,13 @@ export function QueryInterface({ selectedConnection }: QueryInterfaceProps) {
 			loadTableInfo()
 		}
 	}, [selectedConnection])
+
+	useEffect(() => {
+		onStateChange?.({
+			queryText,
+			results
+		})
+	}, [queryText, results])
 
 	const loadTables = async () => {
 		if (!selectedConnection) return
