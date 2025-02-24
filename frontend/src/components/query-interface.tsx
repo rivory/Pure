@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast"
 
 interface QueryInterfaceProps {
-	selectedConnection?: string
+	readonly selectedConnection?: string
 }
 
 export function QueryInterface({ selectedConnection }: QueryInterfaceProps) {
@@ -46,19 +46,17 @@ export function QueryInterface({ selectedConnection }: QueryInterfaceProps) {
 	}
 
 	const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-		if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
-		
-		e.preventDefault();
-		
-		if (queryHistory.length === 0) return;
-		
-		const lastIndex = queryHistory.length - 1;
-		const newIndex = e.key === "ArrowUp"
-        ? Math.min(historyIndex + 1, lastIndex)
-        : Math.max(historyIndex - 1, -1);
-		
-		setHistoryIndex(newIndex);
-		setQueryText(newIndex === -1 ? "" : queryHistory[lastIndex - newIndex]);
+		if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return
+
+		e.preventDefault()
+
+		if (queryHistory.length === 0) return
+
+		const lastIndex = queryHistory.length - 1
+		const newIndex = e.key === "ArrowUp" ? Math.min(historyIndex + 1, lastIndex) : Math.max(historyIndex - 1, -1)
+
+		setHistoryIndex(newIndex)
+		setQueryText(newIndex === -1 ? "" : queryHistory[lastIndex - newIndex])
 	}
 
 	return (
