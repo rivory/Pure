@@ -168,3 +168,106 @@ func (c *ConnectionService) Query(connUUID string, query string) (*QueryResult, 
 		Rows:    result,
 	}, nil
 }
+
+func (c *ConnectionService) ListTables(connUUID string) ([]string, error) {
+	// Find the connection
+	var conn model.Connection
+	for _, c := range c.Conections {
+		if c.Uuid.String() == connUUID {
+			conn = c
+			break
+		}
+	}
+	if conn.Uuid.String() == "" {
+		return nil, fmt.Errorf("connection not found")
+	}
+
+	// Connect to database
+	connUrl := fmt.Sprintf("postgres://%s:%s@%s:%d", conn.Username, conn.Password, conn.Host, conn.Port)
+	db, err := pgx.Connect(c.ctx, connUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close(c.ctx)
+
+	// Query to get all table names
+	rows, err := db.Query(c.ctx, `
+		SELECT table_name 
+		FROM information_schema.tables 
+		WHERE table_schema = 'public'
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tables []string
+	for rows.Next() {
+		var tableName string
+		if err := rows.Scan(&tableName); err != nil {
+			return nil, err
+		}
+		tables = append(tables, tableName)
+	}
+
+	return tables, nil
+}
+
+type TableInfo struct {
+	Name    string   `json:"name"`
+	Columns []string `json:"columns"`
+}
+
+func (c *ConnectionService) GetTableInfo(connUUID string) ([]TableInfo, error) {
+	// Find the connection
+	var conn model.Connection
+	for _, c := range c.Conections {
+		if c.Uuid.String() == connUUID {
+			conn = c
+			break
+		}
+	}
+	if conn.Uuid.String() == "" {
+		return nil, fmt.Errorf("connection not found")
+	}
+
+	// Connect to database
+	connUrl := fmt.Sprintf("postgres://%s:%s@%s:%d", conn.Username, conn.Password, conn.Host, conn.Port)
+	db, err := pgx.Connect(c.ctx, connUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close(c.ctx)
+
+	// Query to get all tables and their columns
+	rows, err := db.Query(c.ctx, `
+		SELECT 
+			t.table_name,
+			array_agg(c.column_name::text) as columns
+		FROM 
+			information_schema.tables t
+			JOIN information_schema.columns c ON c.table_name = t.table_name
+		WHERE 
+			t.table_schema = 'public'
+			AND c.table_schema = 'public'
+		GROUP BY 
+			t.table_name
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tables []TableInfo
+	for rows.Next() {
+		var table TableInfo
+		var columns []string
+		if err := rows.Scan(&table.Name, &columns); err != nil {
+			return nil, err
+		}
+		table.Columns = columns
+		tables = append(tables, table)
+	}
+
+	return tables, nil
+}

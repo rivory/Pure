@@ -6,12 +6,20 @@ export function AddConnection(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['main']['App']['AddConnection'](arg1, arg2, arg3, arg4, arg5);
 }
 
+export function GetTableInfo(arg1) {
+  return window['go']['main']['App']['GetTableInfo'](arg1);
+}
+
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
 
 export function ListConnections() {
   return window['go']['main']['App']['ListConnections']();
+}
+
+export function ListTables(arg1) {
+  return window['go']['main']['App']['ListTables'](arg1);
 }
 
 export function Query(arg1, arg2) {
