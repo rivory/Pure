@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 type ConnectionType string
@@ -25,4 +26,9 @@ type Connection struct {
 
 func (c Connection) GetDSN() string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%d", c.Username, c.Password, c.Host, c.Port)
+}
+
+type ActiveConnection struct {
+	Connection Connection
+	Conn       *pgx.Conn
 }
