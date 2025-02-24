@@ -1,22 +1,83 @@
-import { useState, KeyboardEvent } from "react"
-import { Query } from "../../wailsjs/go/main/App"
+import { useState, KeyboardEvent, useEffect } from "react"
+import { Query, ListTables, GetTableInfo } from "../../wailsjs/go/main/App"
 import { Button } from "@/components/ui/button"
 import CodeMirror from "@uiw/react-codemirror"
 import { sql } from "@codemirror/lang-sql"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/hooks/use-toast"
+import { autocompletion, CompletionContext, startCompletion } from "@codemirror/autocomplete"
+import { keymap } from "@codemirror/view"
+import { createSqlCompletions } from "@/lib/sql-completions"
+import { TableInfo } from "@/types/table-info"
+import { useTheme } from "@/contexts/theme-context"
 
 interface QueryInterfaceProps {
-	selectedConnection?: string
+	readonly selectedConnection?: string
+	readonly selectedTable?: string
+	readonly initialState?: {
+		queryText: string
+		results: {
+			columns: string[]
+			rows: any[][]
+		} | null
+	}
+	readonly onStateChange?: (state: {
+		queryText: string
+		results: {
+			columns: string[]
+			rows: any[][]
+		} | null
+	}) => void
 }
 
-export function QueryInterface({ selectedConnection }: QueryInterfaceProps) {
-	const [queryText, setQueryText] = useState("")
-	const [results, setResults] = useState<{ columns: string[]; rows: any[][] } | null>(null)
+export function QueryInterface({ 
+	selectedConnection,
+	selectedTable,
+	initialState,
+	onStateChange 
+}: QueryInterfaceProps) {
+	const [queryText, setQueryText] = useState(initialState?.queryText ?? "")
+	const [results, setResults] = useState(initialState?.results ?? null)
 	const { toast } = useToast()
 	const [queryHistory, setQueryHistory] = useState<string[]>([])
-	// @ts-ignore - historyIndex is used in event handlers
 	const [historyIndex, setHistoryIndex] = useState(-1)
+	const [tables, setTables] = useState<string[]>([])
+	const [tableInfo, setTableInfo] = useState<TableInfo[]>([])
+	const { theme } = useTheme()
+
+	useEffect(() => {
+		if (selectedConnection) {
+			loadTables()
+			loadTableInfo()
+		}
+	}, [selectedConnection])
+
+	useEffect(() => {
+		onStateChange?.({
+			queryText,
+			results
+		})
+	}, [queryText, results])
+
+	const loadTables = async () => {
+		if (!selectedConnection) return
+		try {
+			const tablesList = await ListTables(selectedConnection)
+			setTables(tablesList)
+		} catch (err) {
+			console.error("Failed to load tables", err)
+		}
+	}
+
+	const loadTableInfo = async () => {
+		if (!selectedConnection) return
+		try {
+			const info = await GetTableInfo(selectedConnection)
+			setTableInfo(info)
+		} catch (err) {
+			console.error("Failed to load table info", err)
+		}
+	}
 
 	const handleQuery = async () => {
 		if (!selectedConnection) {
@@ -46,19 +107,21 @@ export function QueryInterface({ selectedConnection }: QueryInterfaceProps) {
 	}
 
 	const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-		if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
-		
-		e.preventDefault();
-		
-		if (queryHistory.length === 0) return;
-		
-		const lastIndex = queryHistory.length - 1;
-		const newIndex = e.key === "ArrowUp"
-        ? Math.min(historyIndex + 1, lastIndex)
-        : Math.max(historyIndex - 1, -1);
-		
-		setHistoryIndex(newIndex);
-		setQueryText(newIndex === -1 ? "" : queryHistory[lastIndex - newIndex]);
+		// Vérifie si une boîte d'autocomplétion est active
+		const completionActive = document.querySelector('.cm-tooltip-autocomplete')
+		if (completionActive) return console.log("PREVENT ----")
+
+		if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return
+
+		e.preventDefault()
+
+		if (queryHistory.length === 0) return
+
+		const lastIndex = queryHistory.length - 1
+		const newIndex = e.key === "ArrowUp" ? Math.min(historyIndex + 1, lastIndex) : Math.max(historyIndex - 1, -1)
+
+		setHistoryIndex(newIndex)
+		setQueryText(newIndex === -1 ? "" : queryHistory[lastIndex - newIndex])
 	}
 
 	return (
@@ -68,11 +131,18 @@ export function QueryInterface({ selectedConnection }: QueryInterfaceProps) {
 					<CodeMirror
 						value={queryText}
 						height="200px"
-						extensions={[sql()]}
+						extensions={[
+							sql(),
+							autocompletion({ override: [createSqlCompletions(tableInfo)] }),
+							keymap.of([{
+								key: "Alt-Escape",
+								run: startCompletion
+							}])
+						]}
 						onChange={(value) => setQueryText(value)}
 						onKeyDown={handleKeyDown}
 						className="border rounded-md"
-						theme="dark"
+						theme={theme === 'dark' ? 'dark' : 'light'}
 						basicSetup={{
 							lineNumbers: true,
 							highlightActiveLineGutter: true,
