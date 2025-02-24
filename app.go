@@ -27,25 +27,13 @@ func (a *App) startup(ctx context.Context) {
 	a.ConnectionService.Startup(ctx)
 }
 
+func (a *App) shutdown(ctx context.Context) {
+	if a.ActiveConnection != nil && a.ActiveConnection.Conn != nil {
+		a.ActiveConnection.Conn.Close(ctx)
+	}
+}
+
 // Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
 }
-
-// func (a *App) ListDB() []model.DB {
-// 	return a.Dbs
-// }
-
-// func (a *App) AddDB(name, username, password, host string, port int) error {
-// 	a.Dbs = append(a.Dbs, model.DB{
-// 		Uuid:     uuid.New(),
-// 		Name:     name,
-// 		Type:     model.Postgres,
-// 		Host:     host,
-// 		Port:     port,
-// 		Username: username,
-// 		Password: password,
-// 	})
-
-// 	return nil
-// }

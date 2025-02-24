@@ -17,8 +17,9 @@ const (
 )
 
 type ConnectionService struct {
-	ctx        context.Context
-	Conections []model.Connection
+	ctx              context.Context
+	Conections       []model.Connection
+	ActiveConnection *model.ActiveConnection
 }
 
 func NewConnectionService() *ConnectionService {
@@ -61,8 +62,6 @@ func (c *ConnectionService) AddConnection(name, username, password, host string,
 
 	c.Conections = append(c.Conections, conn)
 	c.save()
-
-	// Add active
 
 	return nil
 }
@@ -226,7 +225,6 @@ func (c *ConnectionService) GetTableInfo(connUUID string) ([]TableInfo, error) {
 	if conn.Uuid.String() == "" {
 		return nil, fmt.Errorf("connection not found")
 	}
-
 	// Connect to database
 	db, err := pgx.Connect(c.ctx, conn.GetDSN())
 	if err != nil {
@@ -265,4 +263,18 @@ func (c *ConnectionService) GetTableInfo(connUUID string) ([]TableInfo, error) {
 	}
 
 	return tables, nil
+}
+
+func (c *ConnectionService) SetActiveConnection(conn model.Connection) error {
+	connection, err := pgx.Connect(c.ctx, conn.GetDSN())
+	if err != nil {
+		return err
+	}
+	var active = model.ActiveConnection{
+		Connection: conn,
+		Conn:       connection,
+	}
+	c.ActiveConnection = &active
+
+	return nil
 }
