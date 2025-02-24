@@ -16,12 +16,12 @@ import { TableInfo } from "@/types/table-info"
 import type { Tab } from "@/components/query-tabs"
 
 export default function Page() {
-	const [dbs, setDbs] = useState(Array<model.Connection>)
+	const [connections, SetConnections] = useState(Array<model.Connection>)
 	const { toast } = useToast()
 	const [selectedConnection, setSelectedConnection] = useState<string>()
 	const [activeTab, setActiveTab] = useState("1")
-	const [tabs, setTabs] = useState<Tab[]>([{ 
-		id: "1", 
+	const [tabs, setTabs] = useState<Tab[]>([{
+		id: "1",
 		title: "Query 1",
 		queryState: {
 			queryText: "",
@@ -49,10 +49,10 @@ export default function Page() {
 		}
 	}
 
-	function refreshDB() {
+	function refreshConnection() {
 		ListConnections()
 			.then((result) => {
-				setDbs(result)
+				SetConnections(result)
 				if (result.length > 0 && !selectedConnection) {
 					console.log({ result })
 					console.log("result[0].uuid.toString() :", result[0].uuid.toString())
@@ -71,7 +71,7 @@ export default function Page() {
 	}
 
 	useEffect(() => {
-		refreshDB()
+		refreshConnection()
 	}, [])
 
 	console.log("selectedConnection", selectedConnection)
@@ -79,8 +79,8 @@ export default function Page() {
 	return (
 		<SidebarProvider>
 			<AppSidebar
-				dbs={dbs}
-				refreshDB={refreshDB}
+				connections={connections}
+				refreshConnection={refreshConnection}
 				onSelectConnection={setSelectedConnection}
 			/>
 			<div
@@ -110,7 +110,7 @@ export default function Page() {
 									</BreadcrumbItem>
 									<BreadcrumbSeparator className="hidden md:block" />
 									<BreadcrumbItem>
-										<Select 
+										<Select
 											value={activeTab}
 											onValueChange={setActiveTab}
 										>
@@ -119,8 +119,8 @@ export default function Page() {
 											</SelectTrigger>
 											<SelectContent>
 												{tabs.map((tab) => (
-													<SelectItem 
-														key={tab.id} 
+													<SelectItem
+														key={tab.id}
 														value={tab.id}
 													>
 														{tab.title}
@@ -135,7 +135,7 @@ export default function Page() {
 					</header>
 					<div className="flex flex-1 flex-col gap-4 p-2 pt-0">
 						<div className="flex-1 rounded-xl bg-muted/50 md:min-h-min">
-							<QueryTabs 
+							<QueryTabs
 								selectedConnection={selectedConnection}
 								activeTab={activeTab}
 								onActiveTabChange={setActiveTab}
@@ -150,123 +150,3 @@ export default function Page() {
 		</SidebarProvider>
 	)
 }
-
-{
-	/* <div className="flex flex-1 flex-col gap-4 p-4">
-<div className="grid auto-rows-min gap-4 md:grid-cols-3">
-    <div className="aspect-video rounded-xl bg-muted/50"></div>
-    <div className="aspect-video rounded-xl bg-muted/50" >
-        <h1>Db list</h1>
-        <ul>
-            {dbs === null || dbs.length === 0 ?
-                <h2>
-                    There is no DB added.
-                </h2>
-                :
-                dbs.map((db) => (
-                    <li key={db.host}><b>{db.host}</b> -- {db.username}</li>
-                ))
-            }
-        </ul>
-    </div>
-    <div className="aspect-video rounded-xl bg-muted/50">
-        <SidebarProvider>
-            <DBSwitcher dbs={dbs} refreshDB={refreshDB} />
-        </SidebarProvider>
-    </div>
-</div>
-<div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-</div> */
-}
-
-// import { useState } from 'react';
-// import logo from './assets/images/logo-universal.png';
-// import './App.css';
-// import { Greet } from "../wailsjs/go/main/App";
-
-// function App() {
-//     const [resultText, setResultText] = useState("Please enter your name below 👇");
-//     const [name, setName] = useState('');
-//     const updateName = (e: any) => setName(e.target.value);
-//     const updateResultText = (result: string) => setResultText(result);
-
-//     function greet() {
-//         Greet(name).then(updateResultText);
-//     }
-
-//     return (
-//         <div id="App">
-//             <img src={logo} id="logo" alt="logo" />
-//             <div id="result" className="result">{resultText}</div>
-//             <div id="input" className="input-box">
-//                 <input id="name" className="input" onChange={updateName} autoComplete="off" name="input" type="text" />
-//                 <button className="btn" onClick={greet}>Greet</button>
-//             </div>
-//             <button className="bg-violet-500 hover:bg-violet-600 focus:outline-2 focus:outline-offset-2 focus:outline-violet-500 active:bg-violet-700 ...">
-//                 Save changes
-//             </button>
-//             <h1 className="text-3xl font-bold underline">
-//                 Hello world!
-//             </h1>
-//         </div>
-//     )
-// }
-
-// export default App
-
-// import { AppSidebar } from "@/components/app-sidebar"
-// import {
-//     Breadcrumb,
-//     BreadcrumbItem,
-//     BreadcrumbLink,
-//     BreadcrumbList,
-//     BreadcrumbPage,
-//     BreadcrumbSeparator,
-// } from "@/components/ui/breadcrumb"
-// import { Separator } from "@/components/ui/separator"
-// import {
-//     SidebarInset,
-//     SidebarProvider,
-//     SidebarTrigger,
-// } from "@/components/ui/sidebar"
-
-// export default function Page() {
-//     return (
-//         <SidebarProvider
-//             style={
-//                 {
-//                     "--sidebar-width": "390px",
-//                 } as React.CSSProperties
-//             }
-//         >
-//             <AppSidebar />
-//             <SidebarInset>
-//                 <header className="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4">
-//                     <div className="flex items-center gap-2 px-4">
-//                         <SidebarTrigger className="-ml-1" />
-//                         <Separator orientation="vertical" className="mr-2 h-4" />
-//                         <Breadcrumb>
-//                             <BreadcrumbList>
-//                                 <BreadcrumbItem className="hidden md:block">
-//                                     <BreadcrumbLink href="#">All Inboxes</BreadcrumbLink>
-//                                 </BreadcrumbItem>
-//                                 <BreadcrumbSeparator className="hidden md:block" />
-//                                 <BreadcrumbItem>
-//                                     <BreadcrumbPage>Inbox</BreadcrumbPage>
-//                                 </BreadcrumbItem>
-//                             </BreadcrumbList>
-//                         </Breadcrumb>
-//                     </div>
-//                 </header>
-//                 <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-//                     <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-//                         <div className="aspect-video rounded-xl bg-muted/50" />
-//                         <div className="aspect-video rounded-xl bg-muted/50" />
-//                         <div className="aspect-video rounded-xl bg-muted/50" />
-//                     </div>
-//                     <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-//                 </div>
-//             </SidebarInset>
-//         </SidebarProvider >
-//     )
-// }
