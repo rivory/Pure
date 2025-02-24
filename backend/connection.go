@@ -31,15 +31,11 @@ func (c *ConnectionService) Startup(ctx context.Context) {
 }
 
 func TestConnection(ctx context.Context, conn model.Connection) error {
-	connUrl := fmt.Sprintf("postgres://%s:%s@%s:%d", conn.Username, conn.Password, conn.Host, conn.Port)
-
-	c, err := pgx.Connect(ctx, connUrl)
+	c, err := pgx.Connect(ctx, conn.GetDSN())
 	if err != nil {
-		// TODO: log
-
 		return err
 	}
-	defer c.Close(ctx)
+	c.Close(ctx)
 
 	return nil
 }
@@ -65,6 +61,8 @@ func (c *ConnectionService) AddConnection(name, username, password, host string,
 
 	c.Conections = append(c.Conections, conn)
 	c.save()
+
+	// Add active
 
 	return nil
 }
@@ -132,8 +130,7 @@ func (c *ConnectionService) Query(connUUID string, query string) (*QueryResult, 
 	}
 
 	// Connect to database
-	connUrl := fmt.Sprintf("postgres://%s:%s@%s:%d", conn.Username, conn.Password, conn.Host, conn.Port)
-	db, err := pgx.Connect(c.ctx, connUrl)
+	db, err := pgx.Connect(c.ctx, conn.GetDSN())
 	if err != nil {
 		return nil, err
 	}
@@ -183,8 +180,7 @@ func (c *ConnectionService) ListTables(connUUID string) ([]string, error) {
 	}
 
 	// Connect to database
-	connUrl := fmt.Sprintf("postgres://%s:%s@%s:%d", conn.Username, conn.Password, conn.Host, conn.Port)
-	db, err := pgx.Connect(c.ctx, connUrl)
+	db, err := pgx.Connect(c.ctx, conn.GetDSN())
 	if err != nil {
 		return nil, err
 	}
@@ -232,8 +228,7 @@ func (c *ConnectionService) GetTableInfo(connUUID string) ([]TableInfo, error) {
 	}
 
 	// Connect to database
-	connUrl := fmt.Sprintf("postgres://%s:%s@%s:%d", conn.Username, conn.Password, conn.Host, conn.Port)
-	db, err := pgx.Connect(c.ctx, connUrl)
+	db, err := pgx.Connect(c.ctx, conn.GetDSN())
 	if err != nil {
 		return nil, err
 	}

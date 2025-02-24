@@ -1,6 +1,10 @@
 package model
 
-import "github.com/google/uuid"
+import (
+	"fmt"
+
+	"github.com/google/uuid"
+)
 
 type ConnectionType string
 
@@ -17,4 +21,8 @@ type Connection struct {
 	Port     int            `json:"port"`
 	Username string         `json:"username"`
 	Password string         `json:"password"`
+}
+
+func (c Connection) GetDSN() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%d", c.Username, c.Password, c.Host, c.Port)
 }
