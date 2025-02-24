@@ -4,7 +4,7 @@ import { AudioWaveform, BookOpen, Bot, Command, Frame, GalleryVerticalEnd, Map, 
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-project"
 import { NavUser } from "@/components/nav-user"
-import { DBSwitcher } from "@/components/db-switcher"
+import { ConnectionSwitcher } from "@/components/connection-switcher"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from "@/components/ui/sidebar"
 import { model } from "../../wailsjs/go/models"
 import { Button } from "@/components/ui/button"
@@ -140,38 +140,27 @@ const data = {
 }
 
 interface AppSidebarProps {
-	readonly dbs: model.Connection[]
-	readonly refreshDB: () => void
+	readonly connections: model.Connection[]
+	readonly refreshConnection: () => void
 	readonly onSelectConnection: (uuid: string) => void
 }
 
-export function AppSidebar({ dbs, refreshDB, onSelectConnection, ...props }: AppSidebarProps) {
+export function AppSidebar({ connections, refreshConnection, onSelectConnection, ...props }: AppSidebarProps) {
 	return (
 		<Sidebar
 			collapsible="icon"
 			variant="floating"
 		>
 			<SidebarHeader>
-				<DBSwitcher
-					dbs={dbs}
-					refreshDB={refreshDB}
+				<ConnectionSwitcher
+					connections={connections}
+					refreshConnection={refreshConnection}
+					onSelectConnection={onSelectConnection}
 				/>
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={data.navMain} />
 				<NavProjects projects={data.projects} />
-				{dbs.map((db) => (
-					<Button
-						key={db.uuid.toString()}
-						onClick={() => {
-							console.log("db.uuid", db.uuid)
-							onSelectConnection(db.uuid.toString())
-						}}
-						variant="ghost"
-					>
-						<b>{db.name}</b> - {db.host}
-					</Button>
-				))}
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={data.user} />

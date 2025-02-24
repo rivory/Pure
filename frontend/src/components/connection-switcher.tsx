@@ -22,33 +22,33 @@ import { AddDBDialog } from "@/components/add-db-dialog"
 
 
 
-// If not dbs -> show a button that trigger the components that add DBS
-// If dbs -> show the dropdown selector 
-export function DBSwitcher({
-    dbs,
-    refreshDB
+export function ConnectionSwitcher({
+    connections,
+    refreshConnection,
+    onSelectConnection
 }: {
-    dbs: Array<model.Connection>
-    refreshDB: Function
+    connections: Array<model.Connection>
+    refreshConnection: Function
+    onSelectConnection: Function
 }) {
     const { isMobile } = useSidebar()
-    const hasDBs = dbs !== null && dbs.length !== 0 ? true : false
+    const hasConnections = connections !== null && connections.length !== 0 ? true : false
 
     let trigger = <SidebarMenuButton variant="outline">
         <Plus />Add Database
     </SidebarMenuButton>
 
-    if (hasDBs === false) {
+    if (hasConnections === false) {
         return (
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <AddDBDialog refreshDB={refreshDB} dialogTrigger={trigger} />
+                    <AddDBDialog refreshDB={refreshConnection} dialogTrigger={trigger} />
                 </SidebarMenuItem>
             </SidebarMenu >
         )
     }
 
-    const [activeDB, setActiveDB] = React.useState(dbs[0]);
+    const [activeConnection, setActiveConnection] = React.useState(connections[0]);
 
     trigger = <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="gap-2 p-2">
         <div className="flex size-6 items-center justify-center rounded-md border bg-background">
@@ -71,9 +71,9 @@ export function DBSwitcher({
                             </div>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-semibold">
-                                    {activeDB.name}
+                                    {activeConnection.name}
                                 </span>
-                                <span className="truncate text-xs">{activeDB.name}</span>
+                                <span className="truncate text-xs">{activeConnection.name}</span>
                             </div>
                             <ChevronsUpDown className="ml-auto" />
                         </SidebarMenuButton>
@@ -87,21 +87,21 @@ export function DBSwitcher({
                         <DropdownMenuLabel className="text-xs text-muted-foreground">
                             Teams
                         </DropdownMenuLabel>
-                        {dbs !== null && dbs.length !== 0 ? dbs.map((db, index) => (
+                        {connections !== null && connections.length !== 0 ? connections.map((connection, index) => (
                             <DropdownMenuItem
-                                key={db.name}
-                                onClick={() => setActiveDB(db)}
+                                key={connection.name}
+                                onClick={() => { setActiveConnection(connection); onSelectConnection(connection); }}
                                 className="gap-2 p-2"
                             >
                                 <div className="flex size-6 items-center justify-center rounded-sm border">
                                     <Database className="size-4 shrink-0" />
                                 </div>
-                                {db.name}
+                                {connection.name}
                                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
                             </DropdownMenuItem>
                         )) : ''}
                         <DropdownMenuSeparator />
-                        <AddDBDialog refreshDB={refreshDB} dialogTrigger={trigger} />
+                        <AddDBDialog refreshDB={refreshConnection} dialogTrigger={trigger} />
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>
