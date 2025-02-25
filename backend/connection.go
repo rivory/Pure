@@ -266,6 +266,14 @@ func (c *ConnectionService) GetTableInfo(connUUID string) ([]TableInfo, error) {
 }
 
 func (c *ConnectionService) SetActiveConnection(conn model.Connection) error {
+	// close the previous active connection before opening a new one
+	if c.ActiveConnection != nil && c.ActiveConnection.Conn != nil {
+		err := c.ActiveConnection.Conn.Close(c.ctx)
+		if err != nil {
+			return err
+		}
+	}
+
 	connection, err := pgx.Connect(c.ctx, conn.GetDSN())
 	if err != nil {
 		return err
