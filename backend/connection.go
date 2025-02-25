@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"pureSQL/backend/model"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -265,4 +267,95 @@ func (c *ConnectionService) GetTableInfo(connUUID string) ([]TableInfo, error) {
 	}
 
 	return tables, nil
+}
+
+// Structure pour la requête à l'API Ollama
+type OllamaGenerateRequest struct {
+	Model   string                 `json:"model"`
+	Prompt  string                 `json:"prompt"`
+	Stream  bool                   `json:"stream"`
+	Options map[string]interface{} `json:"options,omitempty"`
+}
+
+// Structure pour la réponse de l'API Ollama
+type OllamaGenerateResponse struct {
+	Model    string `json:"model"`
+	Response string `json:"response"`
+	Done     bool   `json:"done"`
+}
+
+// TranslateToSQL traduit une requête en langage naturel en SQL en utilisant Ollama
+func (c *ConnectionService) TranslateToSQL(naturalText string, tableInfoJSON string) (string, error) {
+	// Vérifier si Ollama est accessible
+	_, err := http.Get("http://localhost:11434/api/version")
+	if err != nil {
+		return "", fmt.Errorf("impossible de se connecter à Ollama: %v", err)
+	}
+
+	// Construire le prompt avec les informations des tables
+	tableInfoText := ""
+	if tableInfoJSON != "" {
+		var tableInfo []model.TableInfo
+		if err := json.Unmarshal([]byte(tableInfoJSON), &tableInfo); err == nil {
+			tableInfoText = "\nInformations sur les tables disponibles:\n"
+			for _, table := range tableInfo {
+				tableInfoText += fmt.Sprintf("Table \"%s\" avec les colonnes: %s\n", 
+					table.Name, strings.Join(table.Columns, ", "))
+			}
+		}
+	}
+
+	prompt := fmt.Sprintf(`Tu es un expert en SQL qui convertit des questions en langage naturel en requêtes SQL optimisées.
+    
+%s
+
+Voici la demande en langage naturel à traduire en SQL:
+"%s"
+
+Réponds uniquement avec la requête SQL valide, sans explications ni commentaires. N'inclus pas de backticks, de marqueurs de code, ou tout autre formatage qui n'est pas du SQL pur.`, tableInfoText, naturalText)
+
+	// Préparer la requête pour Ollama
+	requestBody, err := json.Marshal(OllamaGenerateRequest{
+		Model:  "llama3.2:latest",
+		Prompt: prompt,
+		Stream: false,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	// Envoyer la requête à Ollama
+	resp, err := http.Post(
+		"http://localhost:11434/api/generate",
+		"application/json",
+		strings.NewReader(string(requestBody)),
+	)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Lire la réponse
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	// Décoder la réponse
+	var ollamaResponse OllamaGenerateResponse
+	if err := json.Unmarshal(responseBody, &ollamaResponse); err != nil {
+		return "", err
+	}
+
+	// Nettoyer la réponse SQL
+	sqlQuery := strings.TrimSpace(ollamaResponse.Response)
+
+	// Enlever les backticks si présents
+	if strings.HasPrefix(sqlQuery, "```sql") && strings.HasSuffix(sqlQuery, "```") {
+		sqlQuery = strings.TrimSpace(sqlQuery[6 : len(sqlQuery)-3])
+	} else if strings.HasPrefix(sqlQuery, "```") && strings.HasSuffix(sqlQuery, "```") {
+		sqlQuery = strings.TrimSpace(sqlQuery[3 : len(sqlQuery)-3])
+	}
+
+	return sqlQuery, nil
 }

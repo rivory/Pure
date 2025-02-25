@@ -11,6 +11,14 @@ import { createSqlCompletions } from "@/lib/sql-completions"
 import { TableInfo } from "@/types/table-info"
 import { useTheme } from "@/contexts/theme-context"
 import { Input } from "@/components/ui/input"
+import { translateToSql } from "@/lib/ollama"
+import { Loader2, Info, X } from "lucide-react"
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover"
+import { Badge } from "@/components/ui/badge"
 
 // Interface pour le suivi de la cellule en cours d'édition
 interface EditingCell {
@@ -61,6 +69,10 @@ export function QueryInterface({
 	const inputRef = useRef<HTMLInputElement>(null)
 	// Stockage du nom de la table actuellement affichée
 	const [currentTableName, setCurrentTableName] = useState<string>("")
+	// État pour le champ de texte en langage naturel
+	const [naturalLanguageQuery, setNaturalLanguageQuery] = useState("")
+	// État pour indiquer si la traduction est en cours
+	const [isTranslating, setIsTranslating] = useState(false)
 
 	useEffect(() => {
 		if (selectedConnection) {
@@ -276,8 +288,129 @@ export function QueryInterface({
 		}
 	}
 
+	// Fonction pour traduire le texte en SQL avec Ollama
+	const handleTranslate = async () => {
+		if (!naturalLanguageQuery.trim()) {
+			toast({
+				title: "Champ vide",
+				description: "Veuillez entrer une phrase à traduire en SQL",
+				variant: "destructive",
+			})
+			return
+		}
+
+		setIsTranslating(true)
+		try {
+			// Passer les informations de tables à la fonction translateToSql
+			// qui utilise maintenant le backend Go pour communiquer avec Ollama
+			const sqlQuery = await translateToSql(naturalLanguageQuery, tableInfo)
+			setQueryText(sqlQuery)
+			toast({
+				title: "Traduction réussie",
+				description: "La requête SQL a été générée avec succès",
+			})
+		} catch (err) {
+			console.error("Erreur de traduction", err)
+			toast({
+				title: "Erreur de traduction",
+				description: err instanceof Error ? err.message : "Une erreur s'est produite lors de la traduction",
+				variant: "destructive",
+			})
+		} finally {
+			setIsTranslating(false)
+		}
+	}
+
+	// Fonction pour effacer le champ de traduction
+	const clearTranslationInput = () => {
+		setNaturalLanguageQuery("");
+	}
+
 	return (
 		<div className="flex flex-col gap-4 p-4">
+			{/* Nouveau champ pour la saisie en langage naturel */}
+			<div className="flex flex-col gap-2">
+				<div className="flex items-center gap-2">
+					<h3 className="text-sm font-medium">Traduction IA</h3>
+					<Badge variant="outline" className="text-xs">Experimental</Badge>
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button variant="ghost" size="icon" className="h-6 w-6">
+								<Info className="h-4 w-4" />
+								<span className="sr-only">Informations</span>
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-80">
+							<div className="space-y-2">
+								<h4 className="font-medium">À propos de la traduction IA</h4>
+								<p className="text-sm">
+									Cette fonctionnalité utilise un modèle LLM (llama3.2) local via Ollama pour traduire vos questions en requêtes SQL.
+								</p>
+								<p className="text-sm">
+									<strong>Conseils d'utilisation:</strong>
+								</p>
+								<ul className="text-sm list-disc list-inside space-y-1">
+									<li>Soyez précis dans votre description</li>
+									<li>Spécifiez les tables concernées si possible</li>
+									<li>Vérifiez et ajustez la requête générée avant de l'exécuter</li>
+								</ul>
+								<p className="text-sm text-muted-foreground">
+									Requiert Ollama actif sur votre machine avec le modèle llama3.2
+								</p>
+							</div>
+						</PopoverContent>
+					</Popover>
+				</div>
+				<div className="flex gap-2 items-center">
+					<div className="flex-grow relative">
+						<Input
+							placeholder="Décrivez votre requête en langage naturel, ex: 'Donne-moi tous les utilisateurs créés après 2023'"
+							value={naturalLanguageQuery}
+							onChange={(e) => setNaturalLanguageQuery(e.target.value)}
+							className="w-full pr-8"
+							onKeyDown={(e) => {
+								if (e.key === 'Enter' && !isTranslating && naturalLanguageQuery.trim()) {
+									handleTranslate();
+								}
+							}}
+							disabled={isTranslating}
+						/>
+						{naturalLanguageQuery && (
+							<Button
+								variant="ghost"
+								size="icon"
+								className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+								onClick={clearTranslationInput}
+								disabled={isTranslating}
+							>
+								<X className="h-4 w-4" />
+								<span className="sr-only">Effacer</span>
+							</Button>
+						)}
+					</div>
+					<Button 
+						onClick={handleTranslate} 
+						disabled={isTranslating || !naturalLanguageQuery.trim()}
+						variant="outline"
+						className="min-w-[140px]"
+					>
+						{isTranslating ? (
+							<span className="flex items-center gap-2">
+								<Loader2 className="h-4 w-4 animate-spin" />
+								Traduction...
+							</span>
+						) : "Traduire en SQL"}
+					</Button>
+				</div>
+			</div>
+
+			{/* Ajouter une info pour l'utilisateur */}
+			{tableInfo.length > 0 && (
+				<div className="text-xs text-muted-foreground italic">
+					{`Information: La traduction utilisera les données des ${tableInfo.length} tables disponibles pour optimiser la requête.`}
+				</div>
+			)}
+			
 			<div className="flex gap-2">
 				<div className="flex-grow">
 					<CodeMirror

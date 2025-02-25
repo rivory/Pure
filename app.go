@@ -32,6 +32,11 @@ func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
 }
 
+// TranslateToSQL traduit du texte en langage naturel en SQL
+func (a *App) TranslateToSQL(naturalText string, tableInfoJSON string) (string, error) {
+	return a.ConnectionService.TranslateToSQL(naturalText, tableInfoJSON)
+}
+
 // func (a *App) ListDB() []model.DB {
 // 	return a.Dbs
 // }

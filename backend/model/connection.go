@@ -26,3 +26,9 @@ type Connection struct {
 func (c Connection) GetDSN() string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%d", c.Username, c.Password, c.Host, c.Port)
 }
+
+// TableInfo représente les informations d'une table avec ses colonnes
+type TableInfo struct {
+	Name    string   `json:"name"`
+	Columns []string `json:"columns"`
+}

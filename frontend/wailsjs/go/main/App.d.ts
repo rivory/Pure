@@ -17,3 +17,5 @@ export function ListTables(arg1:string):Promise<Array<string>>;
 export function Query(arg1:string,arg2:string):Promise<backend.QueryResult>;
 
 export function Startup(arg1:context.Context):Promise<void>;
+
+export function TranslateToSQL(arg1:string,arg2:string):Promise<string>;
