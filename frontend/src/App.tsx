@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { model } from "../wailsjs/go/models"
-import { ListConnections, GetTableInfo } from "../wailsjs/go/main/App"
+import { ListConnections, GetTableInfo, SetActiveConnection } from "../wailsjs/go/main/App"
 import { AppSidebar } from "@/components/sidebar"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
@@ -18,7 +18,7 @@ import type { Tab } from "@/components/query-tabs"
 export default function Page() {
 	const [connections, SetConnections] = useState(Array<model.Connection>)
 	const { toast } = useToast()
-	const [selectedConnection, setSelectedConnection] = useState<string>()
+	const [selectedConnection, setSelectedConnection] = useState<model.Connection>()
 	const [activeTab, setActiveTab] = useState("1")
 	const [tabs, setTabs] = useState<Tab[]>([{
 		id: "1",
@@ -34,8 +34,8 @@ export default function Page() {
 	const addNewTab = useCallback(() => {
 		const newId = String(tabs.length + 1)
 		const newTitle = `Query ${newId}`
-		setTabs((prevTabs) => [...prevTabs, { 
-			id: newId, 
+		setTabs((prevTabs) => [...prevTabs, {
+			id: newId,
 			title: newTitle,
 			queryState: {
 				queryText: "",
@@ -67,17 +67,30 @@ export default function Page() {
 	useEffect(() => {
 		if (selectedConnection) {
 			loadTableInfo()
+
+			SetActiveConnection(selectedConnection)
+				.then(() => {
+					// no-op
+				})
+				.catch((err) => {
+					console.error(err) // TODO: better error handling
+					toast({
+						title: "Error setting active connections",
+						description: err instanceof Error ? err.message : "An error occurred",
+						variant: "destructive",
+					})
+				})
 		}
 	}, [selectedConnection])
 
 	const loadTableInfo = async () => {
 		if (!selectedConnection) return
 		try {
-			const info = await GetTableInfo(selectedConnection)
-			setTables(info)
-			if (info.length > 0) {
-				setActiveTab(info[0].name)
-			}
+			// const info = await GetTableInfo(selectedConnection) TODO: fix call
+			// setTables(info)
+			// if (info.length > 0) {
+			// 	setActiveTab(info[0].name)
+			// }
 		} catch (err) {
 			console.error("Failed to load table info", err)
 		}
@@ -90,7 +103,7 @@ export default function Page() {
 				if (result.length > 0 && !selectedConnection) {
 					console.log({ result })
 					console.log("result[0].uuid.toString() :", result[0].uuid.toString())
-					setSelectedConnection(result[0].uuid.toString())
+					setSelectedConnection(result[0])
 				}
 				console.log(result)
 			})

@@ -8,6 +8,8 @@ import { ConnectionSwitcher } from "@/components/connection-switcher"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from "@/components/ui/sidebar"
 import { model } from "../../wailsjs/go/models"
 import { Button } from "@/components/ui/button"
+import { Dispatch, SetStateAction } from "react"
+
 
 // This is sample data.
 const data = {
@@ -142,7 +144,7 @@ const data = {
 interface AppSidebarProps {
 	readonly connections: model.Connection[]
 	readonly refreshConnection: () => void
-	readonly onSelectConnection: (uuid: string) => void
+	onSelectConnection: Dispatch<SetStateAction<model.Connection | undefined>>
 }
 
 export function AppSidebar({ connections, refreshConnection, onSelectConnection, ...props }: AppSidebarProps) {

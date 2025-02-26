@@ -2,7 +2,8 @@ import { Tabs, Box } from "@radix-ui/themes"
 import { QueryInterface } from "@/components/query-interface"
 import { Plus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { model } from "../../wailsjs/go/models"
+
 
 interface QueryState {
   queryText: string
@@ -19,7 +20,7 @@ export interface Tab {
 }
 
 interface QueryTabsProps {
-  selectedConnection?: string
+  selectedConnection?: model.Connection
   activeTab: string
   onActiveTabChange: (tabId: string) => void
   tabs: Tab[]
@@ -27,8 +28,8 @@ interface QueryTabsProps {
   onAddTab?: () => void
 }
 
-export function QueryTabs({ 
-  selectedConnection, 
+export function QueryTabs({
+  selectedConnection,
   activeTab,
   onActiveTabChange,
   tabs,
@@ -41,8 +42,8 @@ export function QueryTabs({
     } else {
       const newId = String(tabs.length + 1)
       const newTitle = `Query ${newId}`
-      onTabsChange([...tabs, { 
-        id: newId, 
+      onTabsChange([...tabs, {
+        id: newId,
         title: newTitle,
         queryState: {
           queryText: "",
@@ -59,15 +60,15 @@ export function QueryTabs({
 
     const newTabs = tabs.filter(tab => tab.id !== tabId)
     onTabsChange(newTabs)
-    
+
     if (tabId === activeTab) {
       onActiveTabChange(newTabs[newTabs.length - 1].id)
     }
   }
 
   const updateTabState = (tabId: string, newState: QueryState) => {
-    onTabsChange(tabs.map(tab => 
-      tab.id === tabId 
+    onTabsChange(tabs.map(tab =>
+      tab.id === tabId
         ? { ...tab, queryState: newState }
         : tab
     ))
@@ -109,7 +110,7 @@ export function QueryTabs({
 
       {tabs.map(tab => (
         <Tabs.Content key={tab.id} value={tab.id}>
-          <QueryInterface 
+          <QueryInterface
             selectedConnection={selectedConnection}
             initialState={tab.queryState}
             onStateChange={(newState) => updateTabState(tab.id, newState)}
