@@ -4,11 +4,14 @@ import { AudioWaveform, BookOpen, Bot, Command, Frame, GalleryVerticalEnd, Map, 
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-project"
 import { NavUser } from "@/components/nav-user"
+import { NavDatabase } from "@/components/nav-database"
 import { ConnectionSwitcher } from "@/components/connection-switcher"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from "@/components/ui/sidebar"
 import { model } from "../../wailsjs/go/models"
 import { Button } from "@/components/ui/button"
 import { Dispatch, SetStateAction } from "react"
+import { CornerLeftUp } from "lucide-react"
+
 
 
 // This is sample data.
@@ -145,9 +148,10 @@ interface AppSidebarProps {
 	readonly connections: model.Connection[]
 	readonly refreshConnection: () => void
 	onSelectConnection: Dispatch<SetStateAction<model.Connection | undefined>>
+	readonly connected: boolean
 }
 
-export function AppSidebar({ connections, refreshConnection, onSelectConnection, ...props }: AppSidebarProps) {
+export function AppSidebar({ connections, refreshConnection, onSelectConnection, connected, ...props }: AppSidebarProps) {
 	return (
 		<Sidebar
 			collapsible="icon"
@@ -161,6 +165,7 @@ export function AppSidebar({ connections, refreshConnection, onSelectConnection,
 				/>
 			</SidebarHeader>
 			<SidebarContent>
+				<NavDatabase databases={[]} connected={connected} />
 				<NavMain items={data.navMain} />
 				<NavProjects projects={data.projects} />
 			</SidebarContent>
