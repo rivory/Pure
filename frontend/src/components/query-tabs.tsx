@@ -35,7 +35,7 @@ export function QueryTabs({
   tabs,
   onTabsChange,
   onAddTab
-}: QueryTabsProps) {
+}: React.PropsWithChildren<QueryTabsProps>) {
   const addTab = () => {
     if (onAddTab) {
       onAddTab()
@@ -84,7 +84,9 @@ export function QueryTabs({
               value={tab.id}
               className="group relative"
             >
-              {tab.queryState.queryText || tab.title}
+              <span className="dark:text-white">
+                {tab.title}
+              </span>
               {tabs.length > 1 && (
                 <Button
                   variant="ghost"
@@ -104,7 +106,7 @@ export function QueryTabs({
           className="mx-2"
           onClick={addTab}
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 dark:text-white" />
         </Button>
       </Box>
 

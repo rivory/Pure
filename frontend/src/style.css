@@ -147,3 +147,11 @@
 .rt-TabsContent {
   outline: none;
 }
+
+.rt-BaseTabListTriggerInnerHidden {
+  display: none;
+}
+
+.rt-TabsTriggerInnerHidden {
+  display: none;
+}
