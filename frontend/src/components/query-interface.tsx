@@ -11,6 +11,8 @@ import { createSqlCompletions } from "@/lib/sql-completions"
 import { TableInfo } from "@/types/table-info"
 import { useTheme } from "@/contexts/theme-context"
 import { Input } from "@/components/ui/input"
+import { model } from "../../wailsjs/go/models"
+
 
 // Interface pour le suivi de la cellule en cours d'édition
 interface EditingCell {
@@ -22,7 +24,7 @@ interface EditingCell {
 }
 
 interface QueryInterfaceProps {
-	readonly selectedConnection?: string
+	readonly selectedConnection?: model.Connection
 	readonly selectedTable?: string
 	readonly initialState?: {
 		queryText: string
@@ -40,11 +42,11 @@ interface QueryInterfaceProps {
 	}) => void
 }
 
-export function QueryInterface({ 
+export function QueryInterface({
 	selectedConnection,
 	selectedTable,
 	initialState,
-	onStateChange 
+	onStateChange
 }: QueryInterfaceProps) {
 	const [queryText, setQueryText] = useState(initialState?.queryText ?? "")
 	const [results, setResults] = useState(initialState?.results ?? null)
@@ -54,7 +56,7 @@ export function QueryInterface({
 	const [tables, setTables] = useState<string[]>([])
 	const [tableInfo, setTableInfo] = useState<TableInfo[]>([])
 	const { theme } = useTheme()
-	
+
 	// État pour suivre la cellule en cours d'édition
 	const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
 	// Référence pour le focus de l'input
@@ -97,8 +99,8 @@ export function QueryInterface({
 	const loadTables = async () => {
 		if (!selectedConnection) return
 		try {
-			const tablesList = await ListTables(selectedConnection)
-			setTables(tablesList)
+			// const tablesList = await ListTables(selectedConnection) TODO: Fix call
+			// setTables(tablesList)
 		} catch (err) {
 			console.error("Failed to load tables", err)
 		}
@@ -107,8 +109,8 @@ export function QueryInterface({
 	const loadTableInfo = async () => {
 		if (!selectedConnection) return
 		try {
-			const info = await GetTableInfo(selectedConnection)
-			setTableInfo(info)
+			// const info = await GetTableInfo(selectedConnection) TODO: fix call
+			// setTableInfo(info)
 		} catch (err) {
 			console.error("Failed to load table info", err)
 		}
@@ -128,8 +130,8 @@ export function QueryInterface({
 		setEditingCell(null)
 
 		try {
-			const result = await Query(selectedConnection, queryText)
-			setResults(result)
+			// const result = await Query(selectedConnection, queryText) 
+			// setResults(result) TODO: Fix call
 			if (queryText.trim()) {
 				setQueryHistory((prev) => [...prev, queryText])
 				setHistoryIndex(-1)
@@ -167,7 +169,7 @@ export function QueryInterface({
 		if (!results) return
 
 		const columnName = results.columns[colIndex]
-		
+
 		setEditingCell({
 			rowIndex,
 			colIndex,
@@ -197,7 +199,7 @@ export function QueryInterface({
 
 		try {
 			const { rowIndex, colIndex, value, tableName, columnName } = editingCell
-			
+
 			if (!tableName || !columnName) {
 				toast({
 					title: "Error",
@@ -210,22 +212,22 @@ export function QueryInterface({
 			// Identifier la ligne pour construire la clause WHERE
 			const whereConditions = results.columns.map((col, idx) => {
 				const cellValue = results.rows[rowIndex][idx]
-				
+
 				// Si c'est la colonne qu'on modifie, utiliser l'ancienne valeur
 				if (idx === colIndex) {
 					return null
 				}
-				
+
 				// Pour les valeurs NULL
 				if (cellValue === null) {
 					return `${col} IS NULL`
 				}
-				
+
 				// Pour les valeurs textuelles, entourer de guillemets simples
 				if (typeof cellValue === 'string') {
 					return `${col} = '${cellValue.replace(/'/g, "''")}'`
 				}
-				
+
 				// Pour les autres types de valeurs
 				return `${col} = ${cellValue}`
 			}).filter(Boolean).join(' AND ')
@@ -252,13 +254,13 @@ export function QueryInterface({
 			const updateQuery = `UPDATE ${tableName} SET ${columnName} = ${updateValue} WHERE ${whereConditions}`
 
 			// Exécuter la requête UPDATE
-			await Query(selectedConnection, updateQuery)
-			
+			// await Query(selectedConnection, updateQuery) TODO fix call
+
 			// Mettre à jour localement le résultat affiché
 			const newResults = { ...results }
 			newResults.rows[rowIndex][colIndex] = value === '' ? null : value
 			setResults(newResults)
-			
+
 			// Notification de succès
 			toast({
 				title: "Update successful",
@@ -337,14 +339,14 @@ export function QueryInterface({
 							{results?.rows?.map((row, rowIdx) => (
 								<TableRow key={rowIdx}>
 									{row.map((cell, colIdx) => (
-										<TableCell 
-											key={colIdx} 
+										<TableCell
+											key={colIdx}
 											onDoubleClick={() => startEditing(rowIdx, colIdx, cell)}
 											className="cursor-pointer"
 										>
-											{editingCell && 
-											 editingCell.rowIndex === rowIdx && 
-											 editingCell.colIndex === colIdx ? (
+											{editingCell &&
+												editingCell.rowIndex === rowIdx &&
+												editingCell.colIndex === colIdx ? (
 												<Input
 													ref={inputRef}
 													value={editingCell.value}
