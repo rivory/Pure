@@ -66,6 +66,33 @@ func (c *ConnectionService) AddConnection(name, username, password, host string,
 	return nil
 }
 
+func (c *ConnectionService) UpdateConnection(conn model.Connection) error {
+	// First test if the connection is valid
+	err := TestConnection(c.ctx, conn)
+	if err != nil {
+		return err
+	}
+
+	// Find and update the connection in the list
+	found := false
+	for i, existingConn := range c.Conections {
+		if existingConn.Uuid == conn.Uuid {
+			c.Conections[i] = conn
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("connection with UUID %s not found", conn.Uuid)
+	}
+
+	// Save the updated connections
+	c.save()
+
+	return nil
+}
+
 func (c *ConnectionService) read() error {
 	fd, err := os.Open(FILE_STORAGE_PATH)
 	if err != nil {
