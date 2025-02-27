@@ -54,7 +54,7 @@ export function ConnectionSwitcher({
         <div className="flex size-6 items-center justify-center rounded-md border bg-background">
             <Plus className="size-4" />
         </div>
-        <div className="font-medium text-muted-foreground">Add DB</div>
+        <div className="font-medium text-muted-foreground">Add Connection</div>
     </DropdownMenuItem>
 
     return (
@@ -85,7 +85,7 @@ export function ConnectionSwitcher({
                         sideOffset={4}
                     >
                         <DropdownMenuLabel className="text-xs text-muted-foreground">
-                            Teams
+                            Connections
                         </DropdownMenuLabel>
                         {connections !== null && connections.length !== 0 ? connections.map((connection, index) => (
                             <DropdownMenuItem

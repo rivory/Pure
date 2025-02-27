@@ -19,6 +19,8 @@ export default function Page() {
 	const [connections, SetConnections] = useState(Array<model.Connection>)
 	const { toast } = useToast()
 	const [selectedConnection, setSelectedConnection] = useState<model.Connection>()
+	var connected: boolean = false
+
 	const [activeTab, setActiveTab] = useState("1")
 	const [tabs, setTabs] = useState<Tab[]>([{
 		id: "1",
@@ -70,7 +72,7 @@ export default function Page() {
 
 			SetActiveConnection(selectedConnection)
 				.then(() => {
-					// no-op
+					connected = true
 				})
 				.catch((err) => {
 					console.error(err) // TODO: better error handling
@@ -129,6 +131,7 @@ export default function Page() {
 				connections={connections}
 				refreshConnection={refreshConnection}
 				onSelectConnection={setSelectedConnection}
+				connected={connected}
 			/>
 			<div
 				id="content"
