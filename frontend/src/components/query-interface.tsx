@@ -1,5 +1,5 @@
 import { useState, KeyboardEvent, useEffect, useRef } from "react"
-import { Query, ListTables, GetTableInfo } from "../../wailsjs/go/main/App"
+import { Query, ListTables, GetTableInfo, TranslateToSQL, IsOllamaRunning, GetOllamaStatus } from "../../wailsjs/go/main/App"
 import { Button } from "@/components/ui/button"
 import CodeMirror from "@uiw/react-codemirror"
 import { sql } from "@codemirror/lang-sql"
@@ -12,13 +12,14 @@ import { TableInfo } from "@/types/table-info"
 import { useTheme } from "@/contexts/theme-context"
 import { Input } from "@/components/ui/input"
 import { translateToSql } from "@/lib/ollama"
-import { Loader2, Info, X } from "lucide-react"
+import { Loader2, Info, X, Lightbulb, Download } from "lucide-react"
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover"
 import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
 
 // Interface pour le suivi de la cellule en cours d'édition
 interface EditingCell {
@@ -27,6 +28,16 @@ interface EditingCell {
 	value: string;
 	tableName?: string;
 	columnName?: string;
+}
+
+// Interface pour le status d'Ollama
+interface OllamaStatus {
+	state: string
+	downloadedSize: number
+	totalSize: number
+	progress: number
+	message: string
+	error?: string
 }
 
 interface QueryInterfaceProps {
@@ -54,26 +65,42 @@ export function QueryInterface({
 	initialState,
 	onStateChange 
 }: QueryInterfaceProps) {
-	const [queryText, setQueryText] = useState(initialState?.queryText ?? "")
-	const [results, setResults] = useState(initialState?.results ?? null)
 	const { toast } = useToast()
-	const [queryHistory, setQueryHistory] = useState<string[]>([])
-	const [historyIndex, setHistoryIndex] = useState(-1)
-	const [tables, setTables] = useState<string[]>([])
-	const [tableInfo, setTableInfo] = useState<TableInfo[]>([])
 	const { theme } = useTheme()
-	
-	// État pour suivre la cellule en cours d'édition
+	const [queryText, setQueryText] = useState(initialState?.queryText || "")
+	const [results, setResults] = useState(initialState?.results || null)
+	const [translationInput, setTranslationInput] = useState("")
+	const [isExecuting, setIsExecuting] = useState(false)
+	const [tableInfo, setTableInfo] = useState<TableInfo[]>([])
+	const [tables, setTables] = useState<string[]>([])
 	const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
-	// Référence pour le focus de l'input
-	const inputRef = useRef<HTMLInputElement>(null)
-	// Stockage du nom de la table actuellement affichée
+	const editInputRef = useRef<HTMLInputElement>(null)
 	const [currentTableName, setCurrentTableName] = useState<string>("")
-	// État pour le champ de texte en langage naturel
-	const [naturalLanguageQuery, setNaturalLanguageQuery] = useState("")
+	const [queryHistory, setQueryHistory] = useState<string[]>([])
+	const [historyIndex, setHistoryIndex] = useState<number>(-1)
+	
 	// État pour indiquer si la traduction est en cours
 	const [isTranslating, setIsTranslating] = useState(false)
-
+	const [isOllamaRunning, setIsOllamaRunning] = useState(false)
+	const [showTranslationInput, setShowTranslationInput] = useState(false)
+	const [naturalLanguageQuery, setNaturalLanguageQuery] = useState("")
+	
+	// Status d'Ollama pour suivre l'installation/téléchargement
+	const [ollamaStatus, setOllamaStatus] = useState<OllamaStatus>({
+		state: "idle",
+		downloadedSize: 0,
+		totalSize: 0,
+		progress: 0,
+		message: "En attente d'initialisation"
+	})
+	
+	// Function to update state and notify parent component
+	const updateState = (newState: { queryText: string, results: { columns: string[], rows: any[][] } | null }) => {
+		if (onStateChange) {
+			onStateChange(newState)
+		}
+	}
+	
 	useEffect(() => {
 		if (selectedConnection) {
 			loadTables()
@@ -101,10 +128,33 @@ export function QueryInterface({
 
 	// Focus sur l'input lorsqu'une cellule est en édition
 	useEffect(() => {
-		if (editingCell && inputRef.current) {
-			inputRef.current.focus()
+		if (editingCell && editInputRef.current) {
+			editInputRef.current.focus()
 		}
 	}, [editingCell])
+
+	// Check if Ollama is running and get its status
+	useEffect(() => {
+		const checkOllamaStatus = async () => {
+			try {
+				const running = await IsOllamaRunning()
+				setIsOllamaRunning(running)
+				
+				// Récupérer l'état détaillé d'Ollama
+				const status = await GetOllamaStatus()
+				setOllamaStatus(status)
+			} catch (error) {
+				console.error("Error checking Ollama status:", error)
+				setIsOllamaRunning(false)
+			}
+		}
+		
+		checkOllamaStatus()
+		
+		// Vérifier l'état toutes les 2 secondes pendant l'installation
+		const interval = setInterval(checkOllamaStatus, 2000)
+		return () => clearInterval(interval)
+	}, [])
 
 	const loadTables = async () => {
 		if (!selectedConnection) return
@@ -290,218 +340,283 @@ export function QueryInterface({
 
 	// Fonction pour traduire le texte en SQL avec Ollama
 	const handleTranslate = async () => {
-		if (!naturalLanguageQuery.trim()) {
+		if (!naturalLanguageQuery.trim()) return
+
+		if (!isOllamaRunning) {
 			toast({
-				title: "Champ vide",
-				description: "Veuillez entrer une phrase à traduire en SQL",
-				variant: "destructive",
+				title: "Ollama non disponible",
+				description: "Le service Ollama est en cours de démarrage ou n'est pas disponible. Veuillez patienter ou vérifier l'état du service.",
+				variant: "destructive"
 			})
 			return
 		}
 
 		setIsTranslating(true)
 		try {
-			// Passer les informations de tables à la fonction translateToSql
+			// Convertir les informations de tables en JSON pour le backend
+			const tableInfoJSON = tableInfo.length > 0 ? JSON.stringify(tableInfo) : "";
+			
+			// Appel au backend pour traduire avec Ollama
 			// qui utilise maintenant le backend Go pour communiquer avec Ollama
-			const sqlQuery = await translateToSql(naturalLanguageQuery, tableInfo)
-			setQueryText(sqlQuery)
-			toast({
-				title: "Traduction réussie",
-				description: "La requête SQL a été générée avec succès",
-			})
-		} catch (err) {
-			console.error("Erreur de traduction", err)
+			const sqlQuery = await TranslateToSQL(naturalLanguageQuery, tableInfoJSON);
+			
+			// Mettre à jour le champ SQL
+			setQueryText(sqlQuery);
+			updateState({ queryText: sqlQuery, results });
+			setNaturalLanguageQuery("");
+			setShowTranslationInput(false);
+			
+		} catch (error) {
+			console.error("Erreur lors de la traduction:", error);
 			toast({
 				title: "Erreur de traduction",
-				description: err instanceof Error ? err.message : "Une erreur s'est produite lors de la traduction",
+				description: error instanceof Error ? error.message : "Une erreur s'est produite lors de la traduction",
 				variant: "destructive",
-			})
+			});
 		} finally {
-			setIsTranslating(false)
+			setIsTranslating(false);
 		}
-	}
+	};
 
-	// Fonction pour effacer le champ de traduction
-	const clearTranslationInput = () => {
-		setNaturalLanguageQuery("");
-	}
+	// Helper pour formater la taille de téléchargement
+	const formatFileSize = (bytes: number): string => {
+		if (bytes === 0) return '0 B';
+		const sizes = ['B', 'KB', 'MB', 'GB'];
+		const i = Math.floor(Math.log(bytes) / Math.log(1024));
+		return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+	};
+	
+	// Rendu du statut d'Ollama
+	const renderOllamaStatus = () => {
+		if (isOllamaRunning && ollamaStatus.state === "running") {
+			return (
+				<Badge variant="outline" className="ml-2 bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100">
+					Ollama prêt
+				</Badge>
+			);
+		}
+		
+		// Pendant le téléchargement
+		if (ollamaStatus.state === "downloading") {
+			return (
+				<div className="ml-2 flex flex-col items-start">
+					<Badge variant="outline" className="mb-1 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 flex items-center">
+						<Download className="mr-1 h-3 w-3" />
+						Téléchargement d'Ollama
+					</Badge>
+					<div className="w-48">
+						<Progress value={ollamaStatus.progress} />
+						<div className="text-xs text-muted-foreground mt-1">
+							{formatFileSize(ollamaStatus.downloadedSize)} / {formatFileSize(ollamaStatus.totalSize)} ({ollamaStatus.progress.toFixed(1)}%)
+						</div>
+					</div>
+				</div>
+			);
+		}
+		
+		// Pendant l'installation
+		if (["extracting", "starting", "checking", "installing"].includes(ollamaStatus.state)) {
+			return (
+				<Badge variant="outline" className="ml-2 bg-amber-100 dark:bg-amber-900 text-amber-900 dark:text-amber-100 flex items-center">
+					<Loader2 className="mr-1 h-3 w-3 animate-spin" />
+					{ollamaStatus.message}
+				</Badge>
+			);
+		}
+		
+		// En cas d'erreur
+		if (ollamaStatus.state === "error") {
+			return (
+				<Badge variant="outline" className="ml-2 bg-red-100 dark:bg-red-900 text-red-900 dark:text-red-100">
+					Erreur: {ollamaStatus.message}
+				</Badge>
+			);
+		}
+		
+		// État par défaut (initialisation)
+		return (
+			<Badge variant="outline" className="ml-2 bg-amber-100 dark:bg-amber-900 text-amber-900 dark:text-amber-100">
+				<Loader2 className="mr-1 h-3 w-3 animate-spin" />
+				Initialisation...
+			</Badge>
+		);
+	};
 
 	return (
-		<div className="flex flex-col gap-4 p-4">
-			{/* Nouveau champ pour la saisie en langage naturel */}
-			<div className="flex flex-col gap-2">
-				<div className="flex items-center gap-2">
-					<h3 className="text-sm font-medium">Traduction IA</h3>
-					<Badge variant="outline" className="text-xs">Experimental</Badge>
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button variant="ghost" size="icon" className="h-6 w-6">
-								<Info className="h-4 w-4" />
-								<span className="sr-only">Informations</span>
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-80">
-							<div className="space-y-2">
-								<h4 className="font-medium">À propos de la traduction IA</h4>
-								<p className="text-sm">
-									Cette fonctionnalité utilise un modèle LLM (llama3.2) local via Ollama pour traduire vos questions en requêtes SQL.
-								</p>
-								<p className="text-sm">
-									<strong>Conseils d'utilisation:</strong>
-								</p>
-								<ul className="text-sm list-disc list-inside space-y-1">
-									<li>Soyez précis dans votre description</li>
-									<li>Spécifiez les tables concernées si possible</li>
-									<li>Vérifiez et ajustez la requête générée avant de l'exécuter</li>
-								</ul>
-								<p className="text-sm text-muted-foreground">
-									Requiert Ollama actif sur votre machine avec le modèle llama3.2
-								</p>
-							</div>
-						</PopoverContent>
-					</Popover>
-				</div>
-				<div className="flex gap-2 items-center">
-					<div className="flex-grow relative">
-						<Input
-							placeholder="Décrivez votre requête en langage naturel, ex: 'Donne-moi tous les utilisateurs créés après 2023'"
-							value={naturalLanguageQuery}
-							onChange={(e) => setNaturalLanguageQuery(e.target.value)}
-							className="w-full pr-8"
-							onKeyDown={(e) => {
-								if (e.key === 'Enter' && !isTranslating && naturalLanguageQuery.trim()) {
-									handleTranslate();
-								}
-							}}
-							disabled={isTranslating}
-						/>
-						{naturalLanguageQuery && (
-							<Button
-								variant="ghost"
-								size="icon"
-								className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
-								onClick={clearTranslationInput}
-								disabled={isTranslating}
-							>
-								<X className="h-4 w-4" />
-								<span className="sr-only">Effacer</span>
-							</Button>
-						)}
-					</div>
+		<div className="flex flex-col h-full p-4">
+			{/* Translation section */}
+			<div className="mb-4 flex items-center">
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => setShowTranslationInput(!showTranslationInput)}
+					className="flex items-center gap-2"
+				>
+					<Lightbulb className="h-4 w-4" />
+					Question en langage naturel
+					{renderOllamaStatus()}
+				</Button>
+				
+				<Popover>
+					<PopoverTrigger asChild>
+						<Button variant="ghost" size="icon" className="ml-2">
+							<Info className="h-4 w-4" />
+						</Button>
+					</PopoverTrigger>
+					<PopoverContent side="bottom" align="start" className="w-80">
+						<div className="space-y-2">
+							<h4 className="font-medium">Traduction en langage naturel</h4>
+							<p className="text-sm text-muted-foreground">
+								Cette fonctionnalité utilise un modèle LLM (llama3.2) local via Ollama pour traduire vos questions en requêtes SQL.
+							</p>
+							<p className="text-sm text-muted-foreground">
+								Exemple: "Montre-moi tous les utilisateurs dont le nom contient 'Smith'"
+							</p>
+							{ollamaStatus.state !== "running" && (
+								<div className="text-sm font-medium text-amber-600 dark:text-amber-400">
+									<p>{ollamaStatus.message}</p>
+									{ollamaStatus.state === "downloading" && (
+										<div className="mt-2">
+											<Progress value={ollamaStatus.progress} />
+											<div className="text-xs mt-1">
+												{formatFileSize(ollamaStatus.downloadedSize)} / {formatFileSize(ollamaStatus.totalSize)}
+											</div>
+										</div>
+									)}
+								</div>
+							)}
+						</div>
+					</PopoverContent>
+				</Popover>
+			</div>
+			
+			{showTranslationInput && (
+				<div className="flex items-center gap-2 mb-4">
+					<Input
+						placeholder="Entrez votre question en langage naturel..."
+						value={naturalLanguageQuery}
+						onChange={(e) => setNaturalLanguageQuery(e.target.value)}
+						className="flex-1"
+						onKeyDown={(e) => e.key === 'Enter' && handleTranslate()}
+						disabled={isTranslating || !isOllamaRunning}
+					/>
 					<Button 
 						onClick={handleTranslate} 
-						disabled={isTranslating || !naturalLanguageQuery.trim()}
-						variant="outline"
-						className="min-w-[140px]"
+						disabled={isTranslating || !naturalLanguageQuery.trim() || !isOllamaRunning}
 					>
 						{isTranslating ? (
-							<span className="flex items-center gap-2">
-								<Loader2 className="h-4 w-4 animate-spin" />
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 								Traduction...
-							</span>
-						) : "Traduire en SQL"}
+							</>
+						) : (
+							'Traduire'
+						)}
 					</Button>
-				</div>
-			</div>
-
-			{/* Ajouter une info pour l'utilisateur */}
-			{tableInfo.length > 0 && (
-				<div className="text-xs text-muted-foreground italic">
-					{`Information: La traduction utilisera les données des ${tableInfo.length} tables disponibles pour optimiser la requête.`}
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={() => setShowTranslationInput(false)}
+					>
+						<X className="h-4 w-4" />
+					</Button>
 				</div>
 			)}
 			
-			<div className="flex gap-2">
-				<div className="flex-grow">
-					<CodeMirror
-						value={queryText}
-						height="200px"
-						extensions={[
-							sql(),
-							autocompletion({ override: [createSqlCompletions(tableInfo)] }),
-							keymap.of([{
-								key: "Alt-Escape",
-								run: startCompletion
-							}])
-						]}
-						onChange={(value) => setQueryText(value)}
-						onKeyDown={handleKeyDown}
-						className="border rounded-md"
-						theme={theme === 'dark' ? 'dark' : 'light'}
-						basicSetup={{
-							lineNumbers: true,
-							highlightActiveLineGutter: true,
-							highlightSpecialChars: true,
-							foldGutter: true,
-							dropCursor: true,
-							allowMultipleSelections: true,
-							indentOnInput: true,
-							bracketMatching: true,
-							closeBrackets: true,
-							autocompletion: true,
-							rectangularSelection: true,
-							crosshairCursor: true,
-							highlightActiveLine: true,
-							highlightSelectionMatches: true,
-							closeBracketsKeymap: true,
-							defaultKeymap: true,
-							searchKeymap: true,
-							historyKeymap: true,
-							foldKeymap: true,
-							completionKeymap: true,
-							lintKeymap: true,
-						}}
-					/>
+			{/* SQL Editor section */}
+			<div className="flex-1">
+				<div className="flex gap-2">
+					<div className="flex-grow">
+						<CodeMirror
+							value={queryText}
+							height="200px"
+							extensions={[
+								sql(),
+								autocompletion({ override: [createSqlCompletions(tableInfo)] }),
+								keymap.of([{
+									key: "Alt-Escape",
+									run: startCompletion
+								}])
+							]}
+							onChange={(value) => setQueryText(value)}
+							onKeyDown={handleKeyDown}
+							className="border rounded-md"
+							theme={theme === 'dark' ? 'dark' : 'light'}
+							basicSetup={{
+								lineNumbers: true,
+								highlightActiveLineGutter: true,
+								highlightSpecialChars: true,
+								foldGutter: true,
+								dropCursor: true,
+								allowMultipleSelections: true,
+								indentOnInput: true,
+								bracketMatching: true,
+								closeBrackets: true,
+								autocompletion: true,
+								rectangularSelection: true,
+								crosshairCursor: true,
+								highlightActiveLine: true,
+								highlightSelectionMatches: true,
+								closeBracketsKeymap: true,
+								defaultKeymap: true,
+								searchKeymap: true,
+								historyKeymap: true,
+								foldKeymap: true,
+								completionKeymap: true,
+								lintKeymap: true,
+							}}
+						/>
+					</div>
+					<Button onClick={handleQuery}>Run Query</Button>
 				</div>
-				<Button onClick={handleQuery}>Run Query</Button>
-			</div>
 
-			{results && (
-				<div className="overflow-x-auto">
-					<Table>
-						<TableHeader>
-							<TableRow>
-								{results.columns.map((column, i) => (
-									<TableHead key={i}>{column}</TableHead>
-								))}
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{results?.rows?.map((row, rowIdx) => (
-								<TableRow key={rowIdx}>
-									{row.map((cell, colIdx) => (
-										<TableCell 
-											key={colIdx} 
-											onDoubleClick={() => startEditing(rowIdx, colIdx, cell)}
-											className="cursor-pointer"
-										>
-											{editingCell && 
-											 editingCell.rowIndex === rowIdx && 
-											 editingCell.colIndex === colIdx ? (
-												<Input
-													ref={inputRef}
-													value={editingCell.value}
-													onChange={(e) => setEditingCell({
-														...editingCell,
-														value: e.target.value
-													})}
-													onKeyDown={handleEditInputKeyDown}
-													onBlur={saveEdit}
-													className="w-full"
-												/>
-											) : (
-												<span className="px-1 py-0.5 rounded hover:bg-muted">
-													{cell === null ? 'NULL' : String(cell)}
-												</span>
-											)}
-										</TableCell>
+				{results && (
+					<div className="overflow-x-auto">
+						<Table>
+							<TableHeader>
+								<TableRow>
+									{results.columns.map((column, i) => (
+										<TableHead key={i}>{column}</TableHead>
 									))}
 								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</div>
-			)}
+							</TableHeader>
+							<TableBody>
+								{results?.rows?.map((row, rowIdx) => (
+									<TableRow key={rowIdx}>
+										{row.map((cell, colIdx) => (
+											<TableCell 
+												key={colIdx} 
+												onDoubleClick={() => startEditing(rowIdx, colIdx, cell)}
+												className="cursor-pointer"
+											>
+												{editingCell && 
+												 editingCell.rowIndex === rowIdx && 
+												 editingCell.colIndex === colIdx ? (
+													<Input
+														ref={editInputRef}
+														value={editingCell.value}
+														onChange={(e) => setEditingCell({
+															...editingCell,
+															value: e.target.value
+														})}
+														onKeyDown={handleEditInputKeyDown}
+														onBlur={saveEdit}
+														className="w-full"
+													/>
+												) : (
+													<span className="px-1 py-0.5 rounded hover:bg-muted">
+														{cell === null ? 'NULL' : String(cell)}
+													</span>
+												)}
+											</TableCell>
+										))}
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</div>
+				)}
+			</div>
 		</div>
 	)
 }

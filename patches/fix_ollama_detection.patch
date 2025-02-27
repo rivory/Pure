@@ -1,0 +1,45 @@
+--- backend/ollama.go.orig
++++ backend/ollama.go
+@@ -30,6 +30,7 @@
+ 	ollamaPath     string
+ 	modelName      string
+ 	port           int
++	preferExternal bool
+ 	apiURL         string
+ 	isRunning      bool
+ 	modelsDir      string
+@@ -43,6 +44,7 @@
+ 	port := 11434
+ 	return &OllamaService{
+ 		port:           port,
++		preferExternal: true,  // Prefer using external Ollama if available
+ 		apiURL:         fmt.Sprintf("http://localhost:%d", port),
+ 		modelName:      "llama3.2:latest",
+ 		modelsDir:      modelsDir,
+@@ -83,6 +85,13 @@
+ 
+ // extractOllamaBinary extracts the embedded Ollama binary to a location
+ func (s *OllamaService) extractOllamaBinary() error {
++	// Check if there's already an external Ollama running and we prefer using it
++	if s.preferExternal && s.IsRunning() {
++		s.isRunning = true
++		s.updateStatus("running", "Ollama externe détecté et utilisé", 100)
++		return nil
++	}
++
+ 	s.updateStatus("checking", "Vérification du binaire Ollama", 0)
+ 	
+ 	// Determine user's home directory for storing the binary
+@@ -447,7 +456,10 @@
+ // Start initializes and starts the embedded Ollama service
+ func (s *OllamaService) Start() error {
+ 	// Si Ollama est déjà en cours d'exécution, ne rien faire
+-	if s.IsRunning() {
++	externalRunning := s.IsRunning()
++	if externalRunning {
++		s.isRunning = true
++		s.updateStatus("running", "Ollama externe détecté et utilisé", 100)
+ 		return nil
+ 	}
+ 	
+} 

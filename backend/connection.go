@@ -286,11 +286,7 @@ type OllamaGenerateResponse struct {
 
 // TranslateToSQL traduit une requête en langage naturel en SQL en utilisant Ollama
 func (c *ConnectionService) TranslateToSQL(naturalText string, tableInfoJSON string) (string, error) {
-	// Vérifier si Ollama est accessible
-	_, err := http.Get("http://localhost:11434/api/version")
-	if err != nil {
-		return "", fmt.Errorf("impossible de se connecter à Ollama: %v", err)
-	}
+	// Note: No need to check if Ollama is accessible here - the app now manages Ollama
 
 	// Construire le prompt avec les informations des tables
 	tableInfoText := ""
@@ -331,7 +327,7 @@ Réponds uniquement avec la requête SQL valide, sans explications ni commentair
 		strings.NewReader(string(requestBody)),
 	)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("impossible de se connecter à Ollama: %v", err)
 	}
 	defer resp.Body.Close()
 

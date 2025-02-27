@@ -1,5 +1,27 @@
 export namespace backend {
 	
+	export class OllamaStatus {
+	    state: string;
+	    downloadedSize: number;
+	    totalSize: number;
+	    progress: number;
+	    message: string;
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new OllamaStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.state = source["state"];
+	        this.downloadedSize = source["downloadedSize"];
+	        this.totalSize = source["totalSize"];
+	        this.progress = source["progress"];
+	        this.message = source["message"];
+	        this.error = source["error"];
+	    }
+	}
 	export class QueryResult {
 	    columns: string[];
 	    rows: any[][];

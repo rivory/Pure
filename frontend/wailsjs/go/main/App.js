@@ -6,12 +6,20 @@ export function AddConnection(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['main']['App']['AddConnection'](arg1, arg2, arg3, arg4, arg5);
 }
 
+export function GetOllamaStatus() {
+  return window['go']['main']['App']['GetOllamaStatus']();
+}
+
 export function GetTableInfo(arg1) {
   return window['go']['main']['App']['GetTableInfo'](arg1);
 }
 
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
+}
+
+export function IsOllamaRunning() {
+  return window['go']['main']['App']['IsOllamaRunning']();
 }
 
 export function ListConnections() {
@@ -24,10 +32,6 @@ export function ListTables(arg1) {
 
 export function Query(arg1, arg2) {
   return window['go']['main']['App']['Query'](arg1, arg2);
-}
-
-export function Startup(arg1) {
-  return window['go']['main']['App']['Startup'](arg1);
 }
 
 export function TranslateToSQL(arg1, arg2) {
