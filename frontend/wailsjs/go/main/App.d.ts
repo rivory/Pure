@@ -19,3 +19,5 @@ export function Query(arg1:string,arg2:string):Promise<backend.QueryResult>;
 export function SetActiveConnection(arg1:model.Connection):Promise<void>;
 
 export function Startup(arg1:context.Context):Promise<void>;
+
+export function UpdateConnection(arg1:model.Connection):Promise<void>;

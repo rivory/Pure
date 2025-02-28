@@ -33,3 +33,7 @@ export function SetActiveConnection(arg1) {
 export function Startup(arg1) {
   return window['go']['main']['App']['Startup'](arg1);
 }
+
+export function UpdateConnection(arg1) {
+  return window['go']['main']['App']['UpdateConnection'](arg1);
+}

@@ -1,6 +1,6 @@
 "use client"
 import * as React from "react"
-import { ChevronsUpDown, Plus, Database } from "lucide-react"
+import { ChevronsUpDown, Plus, Database, Settings2, Edit3 } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,6 +19,13 @@ import {
 import { model } from '../../wailsjs/go/models';
 import { Button } from "./ui/button"
 import { AddDBDialog } from "@/components/add-db-dialog"
+import { EditConnectionDialog } from "@/components/edit-connection-dialog"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 
 
@@ -88,17 +95,49 @@ export function ConnectionSwitcher({
                             Connections
                         </DropdownMenuLabel>
                         {connections !== null && connections.length !== 0 ? connections.map((connection, index) => (
-                            <DropdownMenuItem
-                                key={connection.name}
-                                onClick={() => { setActiveConnection(connection); onSelectConnection(connection); }}
-                                className="gap-2 p-2"
-                            >
-                                <div className="flex size-6 items-center justify-center rounded-sm border">
-                                    <Database className="size-4 shrink-0" />
-                                </div>
-                                {connection.name}
-                                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-                            </DropdownMenuItem>
+                            <div key={connection.name} className="flex">
+                                <DropdownMenuItem
+                                    onClick={() => { 
+                                        setActiveConnection(connection); 
+                                        onSelectConnection(connection); 
+                                    }}
+                                    className="flex-1 gap-2 p-2"
+                                >
+                                    <div className="flex size-6 items-center justify-center rounded-sm border">
+                                        <Database className="size-4 shrink-0" />
+                                    </div>
+                                    {connection.name}
+                                </DropdownMenuItem>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <EditConnectionDialog
+                                                connection={connection}
+                                                refreshDB={refreshConnection}
+                                                onUpdateSuccess={(updatedConnection: model.Connection) => {
+                                                    setActiveConnection(updatedConnection);
+                                                    onSelectConnection(updatedConnection);
+                                                }}
+                                                dialogTrigger={
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-8 w-8 mr-1 my-auto"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation(); // Prevent triggering dropdown item click
+                                                        }}
+                                                    >
+                                                        <Edit3 className="size-4" />
+                                                    </Button>
+                                                }
+                                            />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Edit connection</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
                         )) : ''}
                         <DropdownMenuSeparator />
                         <AddDBDialog refreshDB={refreshConnection} dialogTrigger={trigger} />
