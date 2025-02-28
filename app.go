@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"pureSQL/backend"
-	"pureSQL/backend/model"
 )
 
 // App struct
@@ -42,9 +41,4 @@ func (a *App) shutdown(ctx context.Context) {
 // Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
-}
-
-// UpdateConnection updates an existing connection
-func (a *App) UpdateConnection(conn model.Connection) error {
-	return a.ConnectionService.UpdateConnection(conn)
 }
