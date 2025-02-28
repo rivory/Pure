@@ -57,6 +57,20 @@ export namespace model {
 	        this.password = source["password"];
 	    }
 	}
+	export class Database {
+	    Name: string;
+	    Tables: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Database(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Name = source["Name"];
+	        this.Tables = source["Tables"];
+	    }
+	}
 
 }
 

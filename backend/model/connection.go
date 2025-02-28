@@ -32,3 +32,10 @@ type ActiveConnection struct {
 	Connection Connection
 	Conn       *pgx.Conn
 }
+
+type Table string
+
+type Database struct {
+	Name   string
+	Tables []string
+}

@@ -3,6 +3,7 @@ package backend
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -108,6 +109,90 @@ func (c *ConnectionService) save() error {
 	}
 
 	return nil
+}
+
+func (c *ConnectionService) isActive() error {
+	if c.ActiveConnection == nil || c.ActiveConnection.Conn == nil {
+		return errors.New("no active connection")
+	}
+
+	return nil
+}
+
+func (c *ConnectionService) ListDatabase() ([]model.Database, error) {
+	// check if active connection
+	if err := c.isActive(); err != nil {
+		return nil, err
+	}
+
+	rows, err := c.ActiveConnection.Conn.Query(c.ctx, "SELECT datname FROM pg_database;")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var res []string
+	for rows.Next() {
+		var db string
+		err := rows.Scan(&db)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, db)
+	}
+
+	var dbs []model.Database
+	for _, db := range res {
+		tables, err := c.ListTableForDatabase(db)
+		if err != nil {
+			continue // TODO: find a way to not try to list table for db that are not needed (template etc...)
+		}
+		db := model.Database{
+			Name:   db,
+			Tables: tables,
+		}
+		dbs = append(dbs, db)
+	}
+
+	return dbs, nil
+}
+
+func (c *ConnectionService) ListTableForDatabase(db string) ([]string, error) {
+	// check if active connection
+	if err := c.isActive(); err != nil {
+		return nil, err
+	}
+
+	dsn := c.ActiveConnection.Connection.GetDSN()
+	dsn = fmt.Sprintf("%s/%s", dsn, db)
+
+	conn, err := pgx.Connect(c.ctx, dsn)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close(c.ctx)
+
+	// Query to get all table names
+	rows, err := conn.Query(c.ctx, `
+		SELECT table_name 
+		FROM information_schema.tables 
+		WHERE table_schema = 'public'
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tables []string
+	for rows.Next() {
+		var tableName string
+		if err := rows.Scan(&tableName); err != nil {
+			return nil, err
+		}
+		tables = append(tables, tableName)
+	}
+
+	return tables, nil
 }
 
 type QueryResult struct {
