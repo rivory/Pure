@@ -165,7 +165,7 @@ export function AppSidebar({ connections, refreshConnection, onSelectConnection,
 				/>
 			</SidebarHeader>
 			<SidebarContent>
-				<NavDatabase databases={[]} connected={connected} />
+				<NavDatabase connected={connected} />
 				<NavMain items={data.navMain} />
 				<NavProjects projects={data.projects} />
 			</SidebarContent>

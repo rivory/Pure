@@ -12,6 +12,10 @@ export function Greet(arg1:string):Promise<string>;
 
 export function ListConnections():Promise<Array<model.Connection>>;
 
+export function ListDatabase():Promise<Array<model.Database>>;
+
+export function ListTableForDatabase(arg1:string):Promise<Array<string>>;
+
 export function ListTables(arg1:string):Promise<Array<string>>;
 
 export function Query(arg1:string,arg2:string):Promise<backend.QueryResult>;

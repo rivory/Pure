@@ -19,7 +19,8 @@ export default function Page() {
 	const [connections, SetConnections] = useState(Array<model.Connection>)
 	const { toast } = useToast()
 	const [selectedConnection, setSelectedConnection] = useState<model.Connection>()
-	var connected: boolean = false
+	const [connected, setConnected] = useState(false)
+
 
 	const [activeTab, setActiveTab] = useState("1")
 	const [tabs, setTabs] = useState<Tab[]>([{
@@ -72,7 +73,8 @@ export default function Page() {
 
 			SetActiveConnection(selectedConnection)
 				.then(() => {
-					connected = true
+					console.log("connected to db ")
+					setConnected(true)
 				})
 				.catch((err) => {
 					console.error(err) // TODO: better error handling
@@ -103,11 +105,8 @@ export default function Page() {
 			.then((result) => {
 				SetConnections(result)
 				if (result.length > 0 && !selectedConnection) {
-					console.log({ result })
-					console.log("result[0].uuid.toString() :", result[0].uuid.toString())
 					setSelectedConnection(result[0])
 				}
-				console.log(result)
 			})
 			.catch((err) => {
 				console.error(err)
@@ -123,7 +122,6 @@ export default function Page() {
 		refreshConnection()
 	}, [])
 
-	console.log("selectedConnection", selectedConnection)
 
 	return (
 		<SidebarProvider>

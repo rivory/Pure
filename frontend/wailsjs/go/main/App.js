@@ -18,6 +18,14 @@ export function ListConnections() {
   return window['go']['main']['App']['ListConnections']();
 }
 
+export function ListDatabase() {
+  return window['go']['main']['App']['ListDatabase']();
+}
+
+export function ListTableForDatabase(arg1) {
+  return window['go']['main']['App']['ListTableForDatabase'](arg1);
+}
+
 export function ListTables(arg1) {
   return window['go']['main']['App']['ListTables'](arg1);
 }

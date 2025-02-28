@@ -46,7 +46,12 @@ npx shadcn@latest add button
 created DB
 
 ```bash
-docker run --rm -P -p 127.0.0.1:5432:5432 -e POSTGRES_PASSWORD="1234" --name pg postgres:alpine
+docker run -d -P -p 127.0.0.1:5432:5432 -e POSTGRES_PASSWORD="1234" --name pg postgres:alpine
+```
+
+dump the sql into your db 
+```
+docker exec -i pg psql -U postgres < dump.sql
 ```
 
 connect to db

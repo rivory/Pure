@@ -55,8 +55,6 @@ export function AddDBDialog({
             const validatedForm = validateSchema.parse(data);
 
             AddConnection(validatedForm.name, validatedForm.username, validatedForm.password, validatedForm.host, validatedForm.port).then(() => {
-                console.log("submitted db")
-
                 setOpen(false);
                 refreshDB()
             }).catch(err => {
