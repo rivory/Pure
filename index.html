@@ -1,152 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pure - Database Manager</title>
+    <title>Pure - Your Database GUI, Now Smarter with AI.</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
+        :root {
+            --primary-color: #4461F2;
+            --text-color: #1E1E1E;
+            --light-bg: #F8FAFC;
+            --border-color: #E2E8F0;
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            color: #333;
-            background-color: #f7f9fc;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        header {
-            background-color: #1a1a2e;
+
+        body {
+            line-height: 1.6;
+            color: var(--text-color);
+            background: white;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        .try-now-btn {
+            background: var(--primary-color);
             color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .hero {
+            padding: 4rem 2rem;
             text-align: center;
-            padding: 2rem 0;
-        }
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .hero p {
+            color: #64748B;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 4rem;
+        }
+
+        .secondary-btn {
+            background: #F1F5F9;
+            color: var(--text-color);
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .feature-image {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            background: var(--light-bg);
+            padding: 1rem;
+        }
+
+        .feature-section {
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .feature-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-section p {
+            color: #64748B;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .benefits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 4rem auto;
             padding: 2rem;
         }
-        section {
-            margin-bottom: 2rem;
-            background-color: white;
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-        h2 {
-            color: #1a1a2e;
-            border-bottom: 2px solid #e6e6e6;
-            padding-bottom: 0.5rem;
-            margin-top: 0;
-        }
-        ul {
-            padding-left: 1.5rem;
-        }
-        li {
-            margin-bottom: 0.5rem;
-        }
-        code {
-            background-color: #f0f0f0;
-            padding: 0.2rem 0.4rem;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1rem;
-        }
-        .feature {
-            padding: 1rem;
-            border-radius: 8px;
-            background-color: #f0f4f8;
-        }
-        footer {
+
+        .benefit-card {
             text-align: center;
-            padding: 1rem;
-            background-color: #1a1a2e;
+            padding: 2rem;
+        }
+
+        .benefit-card i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .dark-section {
+            background: #1E1E1E;
             color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .dark-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .dark-section p {
+            color: #A0AEC0;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
+
 <body>
-    <header>
-        <h1>Pure</h1>
-        <p>A modern and intuitive database manager</p>
-    </header>
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <i class="fas fa-database"></i>
+            Pure
+        </a>
+        <div class="nav-links">
+            <a href="#">Product</a>
+            <a href="#">Solutions</a>
+            <a href="#">Community</a>
+            <a href="#">Developers</a>
+            <a href="#">Resources</a>
+        </div>
+    </nav>
 
-    <div class="container">
-        <section>
-            <h2>About the Project</h2>
-            <p>Pure is a database manager developed with Wails and React-TypeScript. This desktop application allows you to connect to your PostgreSQL databases, explore their structures, and execute SQL queries with a modern and intuitive user interface.</p>
-        </section>
+    <section class="hero">
+        <h1>Your Database GUI, Now Smarter with AI.</h1>
+        <p>AI-powered database GUI for effortless query creation, management, and execution.</p>
 
-        <section>
-            <h2>Technologies Used</h2>
-            <ul>
-                <li><strong>Wails</strong> - Framework for creating desktop applications with Go and web interfaces</li>
-                <li><strong>React & TypeScript</strong> - For a reactive and typed user interface</li>
-                <li><strong>Shadcn UI</strong> - Library of modern and accessible UI components</li>
-                <li><strong>Go</strong> - For a robust and high-performance backend</li>
-                <li><strong>PostgreSQL</strong> - Support for PostgreSQL databases</li>
-            </ul>
-        </section>
+        <div class="cta-buttons">
+            <a href="#" class="try-now-btn">Try now for free</a>
+            <!-- <a href="#" class="secondary-btn">Discover the platform</a> -->
+        </div>
 
-        <section>
-            <h2>Features</h2>
-            <div class="features">
-                <div class="feature">
-                    <h3>Connection Management</h3>
-                    <p>Add, test, and organize your database connections</p>
-                </div>
-                <div class="feature">
-                    <h3>Secure Storage</h3>
-                    <p>Your connection information is stored locally in a secure manner</p>
-                </div>
-                <div class="feature">
-                    <h3>Database Exploration</h3>
-                    <p>Easily browse your databases and their tables</p>
-                </div>
-                <div class="feature">
-                    <h3>SQL Editor</h3>
-                    <p>Integrated SQL editor with auto-completion to execute your queries</p>
-                </div>
-            </div>
-        </section>
+        <div class="feature-image">
+            <!-- Placeholder for database interface image -->
+            <div style="height: 400px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px;"></div>
+        </div>
+    </section>
 
-        <section>
-            <h2>Installation</h2>
-            <p>You can download compiled versions for your operating system from the <a href="https://github.com/USERNAME/Pure/releases">Releases</a> section of our GitHub repository.</p>
-            <p>For developers wishing to contribute or compile the application:</p>
-            <ol>
-                <li>Clone the repository: <code>git clone https://github.com/USERNAME/Pure.git</code></li>
-                <li>Install frontend dependencies: <code>cd frontend && npm install</code></li>
-                <li>Launch the application in development mode: <code>wails dev</code></li>
-            </ol>
-        </section>
+    <section class="feature-section">
+        <h2>Transform your database workflows seamlessly</h2>
+        <p>Introducing Pure, a powerful and intuitive graphical user interface (GUI) designed to simplify database
+            management. Whether you're building complex queries, managing data, or saving your most-used queries, this
+            tool streamlines your workflow.</p>
+        <div class="feature-image">
+            <!-- Placeholder for workflow image -->
+            <div style="height: 300px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px;"></div>
+        </div>
+    </section>
 
-        <section>
-            <h2>Roadmap</h2>
-            <ul>
-                <li>✅ Modern UI kit with Shadcn</li>
-                <li>✅ Default layout with sidebar navigation</li>
-                <li>✅ Add and retrieve connection list</li>
-                <li>✅ Test connections when adding them</li>
-                <li>✅ Basic error handling with notifications</li>
-                <li>✅ Local storage of connection information</li>
-                <li>⏳ Password encryption</li>
-                <li>⏳ Database list for active connection</li>
-                <li>⏳ Table list from active database</li>
-                <li>⏳ Run queries and get results</li>
-                <li>⏳ Monaco editor with SQL auto-completion</li>
-            </ul>
-        </section>
-    </div>
+    <section class="feature-section">
+        <h2>Organize, display, and manipulate<br>data to your exact needs</h2>
+        <p>Collect and display data in the ways that make the most sense.</p>
+        <div class="feature-image">
+            <!-- Placeholder for data organization image -->
+            <div style="height: 300px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px;"></div>
+        </div>
+    </section>
 
-    <footer>
-        <p>&copy; 2025 Pure - A modern database manager</p>
-    </footer>
+    <section class="benefits">
+        <div class="benefit-card">
+            <i class="fas fa-robot"></i>
+            <h3>AI-Powered Query Generation</h3>
+            <p>Let AI write complex SQL queries for you. Just describe what you need in plain English.</p>
+        </div>
+        <div class="benefit-card">
+            <i class="fas fa-window-maximize"></i>
+            <h3>Easy-to-Use Graphical Interface</h3>
+            <p>Intuitive drag-and-drop interface makes database management accessible to everyone.</p>
+        </div>
+        <div class="benefit-card">
+            <i class="fas fa-bookmark"></i>
+            <h3>Save and Reuse Your Queries</h3>
+            <p>Build a library of your most useful queries for quick access and sharing with your team.</p>
+        </div>
+        <div class="benefit-card">
+            <i class="fas fa-bolt"></i>
+            <h3>Real-Time Query Execution</h3>
+            <p>Execute queries instantly and see results in real-time with optimized performance.</p>
+        </div>
+    </section>
+
+    <section class="dark-section">
+        <h2>Get Started Now </h2>
+        <p>Download the latest release and simplify your database management tasks with the power of AI.
+
+        </p>
+    </section>
 </body>
-</html> 
+
+</html>
