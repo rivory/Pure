@@ -1,6 +1,5 @@
 "use client";
 
-import { Database, ChevronRight, type LucideIcon } from "lucide-react";
 import {
     Collapsible,
     CollapsibleContent,
@@ -13,16 +12,17 @@ import {
     SidebarMenuAction,
     SidebarMenuButton,
     SidebarMenuItem,
-    useSidebar,
     SidebarMenuSub,
     SidebarMenuSubButton,
     SidebarMenuSubItem,
+    useSidebar,
 } from "@/components/ui/sidebar";
-import { CornerLeftUp, Frown } from "lucide-react";
-import { ListDatabase } from "../../wailsjs/go/main/App";
-import { useEffect, useState } from "react";
-import { model } from "../../wailsjs/go/models";
 import { useToast } from "@/hooks/use-toast";
+import { ChevronRight, Database, type LucideIcon } from "lucide-react";
+import { CornerLeftUp, Frown } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ListDatabase } from "../../wailsjs/go/main/App";
+import type { model } from "../../wailsjs/go/models";
 
 export function NavDatabase({ connected }: { connected: boolean }) {
     const { isMobile } = useSidebar();

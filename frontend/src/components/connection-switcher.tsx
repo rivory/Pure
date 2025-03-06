@@ -1,6 +1,6 @@
 "use client";
-import * as React from "react";
-import { ChevronsUpDown, Plus, Database, Settings2, Edit3 } from "lucide-react";
+import { AddDBDialog } from "@/components/add-db-dialog";
+import { EditConnectionDialog } from "@/components/edit-connection-dialog";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,16 +16,16 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
-import { model } from "../../wailsjs/go/models";
-import { Button } from "./ui/button";
-import { AddDBDialog } from "@/components/add-db-dialog";
-import { EditConnectionDialog } from "@/components/edit-connection-dialog";
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ChevronsUpDown, Database, Edit3, Plus, Settings2 } from "lucide-react";
+import * as React from "react";
+import type { model } from "../../wailsjs/go/models";
+import { Button } from "./ui/button";
 
 export function ConnectionSwitcher({
     connections,

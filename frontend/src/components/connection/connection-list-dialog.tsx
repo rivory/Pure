@@ -1,20 +1,13 @@
-import { useState, useEffect } from "react";
-import { model } from "../../../wailsjs/go/models";
-import { ListConnections } from "../../../wailsjs/go/main/App";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { ListConnections } from "../../../wailsjs/go/main/App";
+import type { model } from "../../../wailsjs/go/models";
 
 import { ConnectionAddDialog } from "./connection-add-dialog";
 import { ConnectionEditDialog } from "./connection-edit-dialog";
 
-import {
-    ChevronRight,
-    PlugZap,
-    Database,
-    SquarePen,
-    Pencil,
-    Trash2,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -24,8 +17,15 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+    ChevronRight,
+    Database,
+    Pencil,
+    PlugZap,
+    SquarePen,
+    Trash2,
+} from "lucide-react";
 
 export function ConnectionListDialog({
     dialogTrigger,
@@ -36,7 +36,7 @@ export function ConnectionListDialog({
     const [activeItem, setActiveItem] = useState<number | null>(null);
 
     // Calculate the height of the container
-    let maxVisibleItems = 5;
+    const maxVisibleItems = 5;
     const maxHeight = `${Math.min(maxVisibleItems, maxVisibleItems) * 3.5}rem`;
 
     function GetListConnections() {
@@ -64,9 +64,9 @@ export function ConnectionListDialog({
         }
     }, [open]);
 
-    let connectionAddTrigger = <Button>New connection</Button>;
+    const connectionAddTrigger = <Button>New connection</Button>;
 
-    let connectionEditTrigger = (
+    const connectionEditTrigger = (
         <button className="p-2 hover:bg-primary/90 hover:text-primary-foreground aspect-square  rounded-lg transition-colors duration-200 ease-in-out">
             <Pencil className="h-4 w-4" />
         </button>

@@ -10,13 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 // import { Plus } from "lucide-react"
 import { z } from "zod";
 // import { zodResolver } from "@hookform/resolvers/zod"
 // import { useForm } from "react-hook-form"
 import { AddConnection } from "../../wailsjs/go/main/App";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 class CustomError extends Error {
     constructor(message: string) {

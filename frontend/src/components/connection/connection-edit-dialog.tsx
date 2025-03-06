@@ -1,12 +1,13 @@
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { model } from "../../../wailsjs/go/models";
+import { useState } from "react";
 import { z } from "zod";
 import {
     SetActiveConnection,
     UpdateConnection,
 } from "../../../wailsjs/go/main/App";
+import type { model } from "../../../wailsjs/go/models";
 
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -18,7 +19,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 
 const validateSchema = z.object({
     uuid: z.string({}),

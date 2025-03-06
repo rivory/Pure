@@ -1,5 +1,21 @@
 "use client";
-import * as React from "react";
+import { ConnectionSwitcher } from "@/components/connection-switcher";
+import { ConnectionListDialog } from "@/components/connection/connection-list-dialog";
+import { NavDatabase } from "@/components/nav-database";
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-project";
+import { NavUser } from "@/components/nav-user";
+import { Button } from "@/components/ui/button";
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarRail,
+} from "@/components/ui/sidebar";
 import {
     AudioWaveform,
     BookOpen,
@@ -12,26 +28,10 @@ import {
     Settings2,
     SquareTerminal,
 } from "lucide-react";
-import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-project";
-import { NavUser } from "@/components/nav-user";
-import { NavDatabase } from "@/components/nav-database";
-import { ConnectionSwitcher } from "@/components/connection-switcher";
-import { ConnectionListDialog } from "@/components/connection/connection-list-dialog";
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarRail,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { model } from "../../wailsjs/go/models";
-import { Button } from "@/components/ui/button";
-import { Dispatch, SetStateAction } from "react";
-import { CornerLeftUp, Cable } from "lucide-react";
+import { Cable, CornerLeftUp } from "lucide-react";
+import * as React from "react";
+import type { Dispatch, SetStateAction } from "react";
+import type { model } from "../../wailsjs/go/models";
 
 // This is sample data.
 const data = {
@@ -177,7 +177,7 @@ export function AppSidebar({
     connected,
     ...props
 }: AppSidebarProps) {
-    let connectionListTrigger = (
+    const connectionListTrigger = (
         <SidebarMenuButton onSelect={(e) => e.preventDefault()}>
             <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                 <Cable className="size-4" />

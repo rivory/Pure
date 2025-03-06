@@ -2,9 +2,9 @@ import React from "react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
-import App from "./App";
-import { Theme, Button } from "@radix-ui/themes";
+import { Button, Theme } from "@radix-ui/themes";
 import { Moon, Sun } from "lucide-react";
+import App from "./App";
 import { ThemeProvider, useTheme } from "./contexts/theme-context";
 
 const container = document.getElementById("root");

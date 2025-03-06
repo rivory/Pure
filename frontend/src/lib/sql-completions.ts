@@ -1,5 +1,5 @@
-import { CompletionContext } from "@codemirror/autocomplete";
-import { TableInfo } from "@/types/table-info";
+import type { TableInfo } from "@/types/table-info";
+import type { CompletionContext } from "@codemirror/autocomplete";
 
 export const createSqlCompletions = (tableInfo: TableInfo[]) => {
     return (context: CompletionContext) => {

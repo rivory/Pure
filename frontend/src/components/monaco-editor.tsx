@@ -1,6 +1,6 @@
-import React from "react";
-import Editor, { OnChange, OnMount } from "@monaco-editor/react";
+import Editor, { OnChange, type OnMount } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
+import React from "react";
 // import { tableSchema } from "./tableSchema1";
 // import * as B from "@mobily/ts-belt";
 
@@ -67,7 +67,7 @@ class MonacoEditor extends React.Component<MonacoEditorProps> {
                     endColumn: word.endColumn,
                 };
 
-                let suggestions: monaco.languages.CompletionItem[] = [
+                const suggestions: monaco.languages.CompletionItem[] = [
                     {
                         label: "myCustomSnippet",
                         kind: monaco.languages.CompletionItemKind.Snippet,

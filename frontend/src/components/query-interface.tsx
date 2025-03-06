@@ -1,8 +1,5 @@
-import { useState, KeyboardEvent, useEffect, useRef } from "react";
-import { Query, ListTables, GetTableInfo } from "../../wailsjs/go/main/App";
 import { Button } from "@/components/ui/button";
-import CodeMirror from "@uiw/react-codemirror";
-import { sql } from "@codemirror/lang-sql";
+import { Input } from "@/components/ui/input";
 import {
     Table,
     TableBody,
@@ -11,18 +8,21 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { useTheme } from "@/contexts/theme-context";
 import { useToast } from "@/hooks/use-toast";
+import { createSqlCompletions } from "@/lib/sql-completions";
+import type { TableInfo } from "@/types/table-info";
 import {
-    autocompletion,
     CompletionContext,
+    autocompletion,
     startCompletion,
 } from "@codemirror/autocomplete";
+import { sql } from "@codemirror/lang-sql";
 import { keymap } from "@codemirror/view";
-import { createSqlCompletions } from "@/lib/sql-completions";
-import { TableInfo } from "@/types/table-info";
-import { useTheme } from "@/contexts/theme-context";
-import { Input } from "@/components/ui/input";
-import { model } from "../../wailsjs/go/models";
+import CodeMirror from "@uiw/react-codemirror";
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { GetTableInfo, ListTables, Query } from "../../wailsjs/go/main/App";
+import type { model } from "../../wailsjs/go/models";
 
 // Interface pour le suivi de la cellule en cours d'édition
 interface EditingCell {

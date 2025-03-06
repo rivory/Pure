@@ -1,12 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { model } from "../wailsjs/go/models";
-import {
-    ListConnections,
-    GetTableInfo,
-    SetActiveConnection,
-} from "../wailsjs/go/main/App";
+import { QueryTabs } from "@/components/query-tabs";
+import type { Tab } from "@/components/query-tabs";
 import { AppSidebar } from "@/components/sidebar";
 import {
     Breadcrumb,
@@ -15,17 +10,6 @@ import {
     BreadcrumbList,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import {
-    Sidebar,
-    SidebarInset,
-    SidebarProvider,
-    SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
-import { Toaster } from "@/components/ui/toaster";
-import { useToast } from "@/hooks/use-toast";
-import { QueryTabs } from "@/components/query-tabs";
 import {
     Select,
     SelectContent,
@@ -33,8 +17,24 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { TableInfo } from "@/types/table-info";
-import type { Tab } from "@/components/query-tabs";
+import { Separator } from "@/components/ui/separator";
+import {
+    Sidebar,
+    SidebarInset,
+    SidebarProvider,
+    SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import type { TableInfo } from "@/types/table-info";
+import { useCallback, useEffect, useState } from "react";
+import {
+    GetTableInfo,
+    ListConnections,
+    SetActiveConnection,
+} from "../wailsjs/go/main/App";
+import type { model } from "../wailsjs/go/models";
 
 export default function Page() {
     const [connections, SetConnections] = useState(Array<model.Connection>);

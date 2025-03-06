@@ -1,8 +1,8 @@
-import { Tabs, Box } from "@radix-ui/themes";
 import { QueryInterface } from "@/components/query-interface";
-import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { model } from "../../wailsjs/go/models";
+import { Box, Tabs } from "@radix-ui/themes";
+import { Plus, X } from "lucide-react";
+import type { model } from "../../wailsjs/go/models";
 
 interface QueryState {
     queryText: string;
