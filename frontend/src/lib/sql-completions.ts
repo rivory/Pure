@@ -1,15 +1,15 @@
-import { CompletionContext } from "@codemirror/autocomplete"
-import { TableInfo } from "@/types/table-info"
+import type { TableInfo } from "@/types/table-info";
+import type { CompletionContext } from "@codemirror/autocomplete";
 
 export const createSqlCompletions = (tableInfo: TableInfo[]) => {
     return (context: CompletionContext) => {
-        const word = context.matchBefore(/\w*/)
-        if (!word) return null
+        const word = context.matchBefore(/\w*/);
+        if (!word) return null;
 
-        const beforeText = context.state.doc.sliceString(0, context.pos)
-        
+        const beforeText = context.state.doc.sliceString(0, context.pos);
+
         // Suggestions au début de la requête ou sur Option+Escape
-        if (beforeText.trim() === '' || context.explicit) {
+        if (beforeText.trim() === "" || context.explicit) {
             return {
                 from: word.from,
                 options: [
@@ -20,8 +20,8 @@ export const createSqlCompletions = (tableInfo: TableInfo[]) => {
                     { label: "CREATE", type: "keyword" },
                     { label: "DROP", type: "keyword" },
                     { label: "ALTER", type: "keyword" },
-                ]
-            }
+                ],
+            };
         }
 
         // Suggestions après CREATE
@@ -36,8 +36,8 @@ export const createSqlCompletions = (tableInfo: TableInfo[]) => {
                     { label: "FUNCTION", type: "keyword" },
                     { label: "TRIGGER", type: "keyword" },
                     { label: "SCHEMA", type: "keyword" },
-                ]
-            }
+                ],
+            };
         }
 
         // Suggestions après CREATE TABLE
@@ -46,17 +46,19 @@ export const createSqlCompletions = (tableInfo: TableInfo[]) => {
                 from: word.from,
                 options: [
                     { label: "IF NOT EXISTS", type: "keyword" },
-                    ...tableInfo.map(table => ({
+                    ...tableInfo.map((table) => ({
                         label: table.name,
                         type: "table",
-                        detail: "Existing table name"
-                    }))
-                ]
-            }
+                        detail: "Existing table name",
+                    })),
+                ],
+            };
         }
 
         // Suggestions pour les types de colonnes dans CREATE TABLE
-        if (/CREATE\s+TABLE\s+[\w\s]+\(\s*[\w\s,]*\w+\s+\w*$/i.test(beforeText)) {
+        if (
+            /CREATE\s+TABLE\s+[\w\s]+\(\s*[\w\s,]*\w+\s+\w*$/i.test(beforeText)
+        ) {
             return {
                 from: word.from,
                 options: [
@@ -78,8 +80,8 @@ export const createSqlCompletions = (tableInfo: TableInfo[]) => {
                     { label: "JSON", type: "type" },
                     { label: "JSONB", type: "type" },
                     { label: "UUID", type: "type" },
-                ]
-            }
+                ],
+            };
         }
 
         // Suggestions après SELECT
@@ -88,25 +90,27 @@ export const createSqlCompletions = (tableInfo: TableInfo[]) => {
                 from: word.from,
                 options: [
                     { label: "*", type: "keyword" },
-                    ...tableInfo.flatMap(table => 
-                        table.columns.map(column => ({
+                    ...tableInfo.flatMap((table) =>
+                        table.columns.map((column) => ({
                             label: column,
                             type: "field",
-                            detail: `Column from ${table.name}`
-                        }))
+                            detail: `Column from ${table.name}`,
+                        })),
                     ),
                     { label: "DISTINCT", type: "keyword" },
                     { label: "COUNT", type: "function" },
                     { label: "SUM", type: "function" },
                     { label: "AVG", type: "function" },
                     { label: "MAX", type: "function" },
-                    { label: "MIN", type: "function" }
-                ]
-            }
+                    { label: "MIN", type: "function" },
+                ],
+            };
         }
 
         // Suggestions après SELECT * ou après une virgule dans la liste des colonnes
-        if (/SELECT\s+\*\s+\w*$|SELECT\s+(?:[\w\s,])+\s+\w*$/i.test(beforeText)) {
+        if (
+            /SELECT\s+\*\s+\w*$|SELECT\s+(?:[\w\s,])+\s+\w*$/i.test(beforeText)
+        ) {
             return {
                 from: word.from,
                 options: [
@@ -116,20 +120,20 @@ export const createSqlCompletions = (tableInfo: TableInfo[]) => {
                     { label: "HAVING", type: "keyword" },
                     { label: "ORDER BY", type: "keyword" },
                     { label: "LIMIT", type: "keyword" },
-                ]
-            }
+                ],
+            };
         }
 
         // Suggestions après FROM
         if (/FROM\s+\w*$/i.test(beforeText)) {
             return {
                 from: word.from,
-                options: tableInfo.map(table => ({
+                options: tableInfo.map((table) => ({
                     label: table.name,
                     type: "table",
-                    detail: `${table.columns.length} columns`
-                }))
-            }
+                    detail: `${table.columns.length} columns`,
+                })),
+            };
         }
 
         // Suggestions après FROM <table>
@@ -145,22 +149,22 @@ export const createSqlCompletions = (tableInfo: TableInfo[]) => {
                     { label: "LEFT JOIN", type: "keyword" },
                     { label: "RIGHT JOIN", type: "keyword" },
                     { label: "INNER JOIN", type: "keyword" },
-                ]
-            }
+                ],
+            };
         }
 
         // Suggestions après WHERE ou AND/OR
         if (/WHERE\s+\w*$|AND\s+\w*$|OR\s+\w*$/i.test(beforeText)) {
             return {
                 from: word.from,
-                options: tableInfo.flatMap(table => 
-                    table.columns.map(column => ({
+                options: tableInfo.flatMap((table) =>
+                    table.columns.map((column) => ({
                         label: column,
                         type: "field",
-                        detail: `Column from ${table.name}`
-                    }))
-                )
-            }
+                        detail: `Column from ${table.name}`,
+                    })),
+                ),
+            };
         }
 
         // Suggestions après WHERE <column>
@@ -178,10 +182,10 @@ export const createSqlCompletions = (tableInfo: TableInfo[]) => {
                     { label: "IN", type: "operator" },
                     { label: "IS NULL", type: "operator" },
                     { label: "IS NOT NULL", type: "operator" },
-                ]
-            }
+                ],
+            };
         }
 
-        return null
-    }
-} 
+        return null;
+    };
+};

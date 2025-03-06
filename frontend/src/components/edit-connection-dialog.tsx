@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -7,14 +7,17 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { z } from "zod"
-import { useState } from 'react';
-import { useToast } from "@/hooks/use-toast"
-import { model } from '../../wailsjs/go/models';
-import { SetActiveConnection, UpdateConnection } from "../../wailsjs/go/main/App";
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { z } from "zod";
+import {
+    SetActiveConnection,
+    UpdateConnection,
+} from "../../wailsjs/go/main/App";
+import type { model } from "../../wailsjs/go/models";
 
 const validateSchema = z.object({
     uuid: z.string({}),
@@ -22,36 +25,38 @@ const validateSchema = z.object({
     username: z.string({}),
     password: z.string({}),
     host: z.string({}),
-    port: z.coerce.number().refine((val) => `${val}`.length === 4, 'Port must be 4 digits long'),
-})
+    port: z.coerce
+        .number()
+        .refine((val) => `${val}`.length === 4, "Port must be 4 digits long"),
+});
 
 export function EditConnectionDialog({
     connection,
     refreshDB,
     dialogTrigger,
-    onUpdateSuccess
+    onUpdateSuccess,
 }: {
-    connection: model.Connection
-    refreshDB: Function
-    dialogTrigger: JSX.Element
-    onUpdateSuccess?: (updatedConnection: model.Connection) => void
+    connection: model.Connection;
+    refreshDB: Function;
+    dialogTrigger: JSX.Element;
+    onUpdateSuccess?: (updatedConnection: model.Connection) => void;
 }) {
     const [open, setOpen] = useState(false);
-    const { toast } = useToast()
+    const { toast } = useToast();
     const [formData, setFormData] = useState({
-        uuid: connection.uuid?.toString() || '',
-        name: connection.name || '',
-        username: connection.username || '',
-        password: connection.password || '',
-        host: connection.host || '',
+        uuid: connection.uuid?.toString() || "",
+        name: connection.name || "",
+        username: connection.username || "",
+        password: connection.password || "",
+        host: connection.host || "",
         port: connection.port || 5432,
     });
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         const { name, value } = e.target;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            [name]: value
+            [name]: value,
         }));
     }
 
@@ -82,7 +87,8 @@ export function EditConnectionDialog({
                 .then(() => {
                     toast({
                         title: "Connection updated",
-                        description: "Connection updated and reconnected successfully.",
+                        description:
+                            "Connection updated and reconnected successfully.",
                     });
 
                     setOpen(false);
@@ -109,7 +115,9 @@ export function EditConnectionDialog({
         } catch (err) {
             let errorMessage = "There was a problem with your request.";
             if (err instanceof z.ZodError) {
-                errorMessage = err.errors.map(e => `${e.path}: ${e.message}`).join(", ");
+                errorMessage = err.errors
+                    .map((e) => `${e.path}: ${e.message}`)
+                    .join(", ");
             }
 
             toast({
@@ -122,9 +130,7 @@ export function EditConnectionDialog({
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                {dialogTrigger}
-            </DialogTrigger>
+            <DialogTrigger asChild>{dialogTrigger}</DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Edit Connection</DialogTitle>
@@ -203,5 +209,5 @@ export function EditConnectionDialog({
                 </form>
             </DialogContent>
         </Dialog>
-    )
-} 
+    );
+}

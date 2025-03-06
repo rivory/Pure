@@ -53,7 +53,7 @@ export function EventsOnce(eventName, callback) {
 }
 
 export function EventsEmit(eventName) {
-    let args = [eventName].slice.call(arguments);
+    const args = [eventName].slice.call(arguments);
     return window.runtime.EventsEmit.apply(null, args);
 }
 
