@@ -1,21 +1,37 @@
-"use client"
-import * as React from "react"
-import { AudioWaveform, BookOpen, Bot, Command, Frame, GalleryVerticalEnd, Map, PieChart, Settings2, SquareTerminal } from "lucide-react"
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-project"
-import { NavUser } from "@/components/nav-user"
-import { NavDatabase } from "@/components/nav-database"
-import { ConnectionSwitcher } from "@/components/connection-switcher"
-import { ConnectionListDialog } from "@/components/connection/connection-list-dialog"
+"use client";
+import * as React from "react";
 import {
-	Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { model } from "../../wailsjs/go/models"
-import { Button } from "@/components/ui/button"
-import { Dispatch, SetStateAction } from "react"
-import { CornerLeftUp, Cable } from "lucide-react"
-
-
+	AudioWaveform,
+	BookOpen,
+	Bot,
+	Command,
+	Frame,
+	GalleryVerticalEnd,
+	Map,
+	PieChart,
+	Settings2,
+	SquareTerminal,
+} from "lucide-react";
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-project";
+import { NavUser } from "@/components/nav-user";
+import { NavDatabase } from "@/components/nav-database";
+import { ConnectionSwitcher } from "@/components/connection-switcher";
+import { ConnectionListDialog } from "@/components/connection/connection-list-dialog";
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarFooter,
+	SidebarHeader,
+	SidebarRail,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { model } from "../../wailsjs/go/models";
+import { Button } from "@/components/ui/button";
+import { Dispatch, SetStateAction } from "react";
+import { CornerLeftUp, Cable } from "lucide-react";
 
 // This is sample data.
 const data = {
@@ -145,29 +161,33 @@ const data = {
 			icon: Map,
 		},
 	],
-}
+};
 
 interface AppSidebarProps {
-	readonly connections: model.Connection[]
-	readonly refreshConnection: () => void
-	onSelectConnection: Dispatch<SetStateAction<model.Connection | undefined>>
-	readonly connected: boolean
+	readonly connections: model.Connection[];
+	readonly refreshConnection: () => void;
+	onSelectConnection: Dispatch<SetStateAction<model.Connection | undefined>>;
+	readonly connected: boolean;
 }
 
-export function AppSidebar({ connections, refreshConnection, onSelectConnection, connected, ...props }: AppSidebarProps) {
-
-	let connectionListTrigger = <SidebarMenuButton onSelect={(e) => e.preventDefault()}>
-		<div className="flex size-6 items-center justify-center rounded-md border bg-background">
-			<Cable className="size-4" />
-		</div>
-		<div className="text-muted-foreground">Connections</div>
-	</SidebarMenuButton>
+export function AppSidebar({
+	connections,
+	refreshConnection,
+	onSelectConnection,
+	connected,
+	...props
+}: AppSidebarProps) {
+	let connectionListTrigger = (
+		<SidebarMenuButton onSelect={(e) => e.preventDefault()}>
+			<div className="flex size-6 items-center justify-center rounded-md border bg-background">
+				<Cable className="size-4" />
+			</div>
+			<div className="text-muted-foreground">Connections</div>
+		</SidebarMenuButton>
+	);
 
 	return (
-		<Sidebar
-			collapsible="icon"
-			variant="floating"
-		>
+		<Sidebar collapsible="icon" variant="floating">
 			<SidebarHeader>
 				<ConnectionSwitcher
 					connections={connections}
@@ -190,5 +210,5 @@ export function AppSidebar({ connections, refreshConnection, onSelectConnection,
 			</SidebarFooter>
 			<SidebarRail />
 		</Sidebar>
-	)
+	);
 }
