@@ -1,14 +1,21 @@
 {
-    "compilerOptions": {
-        "composite": true,
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "allowSyntheticDefaultImports": true,
-        "baseUrl": ".",
-        "paths": {
-            "@/*": ["./src/*"]
-        },
-        "types": ["vite", "monaco-editor"]
+  "compilerOptions": {
+    "composite": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
     },
-    "include": ["vite.config.ts"]
+    "types": [
+      "vite",
+      "monaco-editor",
+    ]
+  },
+  "include": [
+    "vite.config.ts"
+  ]
 }
