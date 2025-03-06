@@ -79,7 +79,7 @@ export function QueryTabs({
 	return (
 		<Tabs.Root value={activeTab} onValueChange={onActiveTabChange}>
 			<Box className="flex items-center border-b">
-				<Tabs.List className="flex-1 flex overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-slate-400 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent">
+				<Tabs.List className="flex-1 flex overflow-x-auto whitespace-nowrap scrollbar-none">
 					{tabs.map((tab) => (
 						<Tabs.Trigger
 							key={tab.id}
