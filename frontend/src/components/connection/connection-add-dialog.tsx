@@ -1,4 +1,10 @@
-import { Button } from "@/components/ui/button"
+import { useState } from 'react';
+import { useToast } from "@/hooks/use-toast"
+import { z } from "zod"
+import { AddConnection } from "../../../wailsjs/go/main/App";
+
+
+
 import {
     Dialog,
     DialogContent,
@@ -10,20 +16,8 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-// import { Plus } from "lucide-react"
-import { z } from "zod"
-// import { zodResolver } from "@hookform/resolvers/zod"
-// import { useForm } from "react-hook-form"
-import { AddConnection } from "../../wailsjs/go/main/App";
-import { useState } from 'react';
-import { useToast } from "@/hooks/use-toast"
+import { Button } from "@/components/ui/button"
 
-class CustomError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "CustomError";
-    }
-}
 
 
 const validateSchema = z.object({
@@ -34,13 +28,8 @@ const validateSchema = z.object({
     port: z.coerce.number().refine((val) => `${val}`.length === 4, 'Port must be 4 digits long'),
 })
 
-export function AddDBDialog({
-    refreshDB,
-    dialogTrigger
-}: {
-    refreshDB: Function
-    dialogTrigger: JSX.Element
-}) {
+
+export function ConnectionAddDialog({ dialogTrigger, callback }: { dialogTrigger: JSX.Element, callback: Function }) {
     const [open, setOpen] = useState(false);
     const { toast } = useToast()
 
@@ -56,7 +45,7 @@ export function AddDBDialog({
 
             AddConnection(validatedForm.name, validatedForm.username, validatedForm.password, validatedForm.host, validatedForm.port).then(() => {
                 setOpen(false);
-                refreshDB()
+                callback();
             }).catch(err => {
                 let message
                 if (err instanceof Error) message = err.message
@@ -83,27 +72,20 @@ export function AddDBDialog({
         }
     }
 
-    // const form = useForm<z.infer<typeof FormSchema>>({
-    //     resolver: zodResolver(FormSchema),
-    //     defaultValues: {
-    //         name: "",
-    //         username: "",
-    //         password: "",
-    //         host: "",
-    //         port: 5542,
-    //     },
-    // })
+    // TODO: add ssl mode 
+    // TODO: store password in keychain ??
+    // TODO: add optional database name
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {dialogTrigger}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Add Connection</DialogTitle>
+                    <DialogTitle>New connection</DialogTitle>
                     <DialogDescription>
-                        Add a connection to connect to it.
+                        Add a new connection.
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>

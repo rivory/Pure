@@ -34,6 +34,7 @@ export namespace backend {
 export namespace model {
 	
 	export class Connection {
+	    id: number;
 	    uuid: number[];
 	    name: string;
 	    type: string;
@@ -48,6 +49,7 @@ export namespace model {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
 	        this.uuid = source["uuid"];
 	        this.name = source["name"];
 	        this.type = source["type"];
