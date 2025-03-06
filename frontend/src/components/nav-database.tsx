@@ -1,7 +1,10 @@
-"use client"
+"use client";
 
-import { Database, ChevronRight, type LucideIcon } from "lucide-react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
 	SidebarGroup,
 	SidebarGroupLabel,
@@ -9,35 +12,36 @@ import {
 	SidebarMenuAction,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	useSidebar,
 	SidebarMenuSub,
 	SidebarMenuSubButton,
 	SidebarMenuSubItem,
-} from "@/components/ui/sidebar"
-import { CornerLeftUp, Frown } from "lucide-react"
-import { ListDatabase } from "../../wailsjs/go/main/App"
-import { useEffect, useState } from "react"
-import { model } from "../../wailsjs/go/models"
-import { useToast } from "@/hooks/use-toast"
+	useSidebar,
+} from "@/components/ui/sidebar";
+import { useToast } from "@/hooks/use-toast";
+import { ChevronRight, Database, type LucideIcon } from "lucide-react";
+import { CornerLeftUp, Frown } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ListDatabase } from "../../wailsjs/go/main/App";
+import type { model } from "../../wailsjs/go/models";
 
 export function NavDatabase({ connected }: { connected: boolean }) {
-	const { isMobile } = useSidebar()
-	const { toast } = useToast()
+	const { isMobile } = useSidebar();
+	const { toast } = useToast();
 
-	const [databases, setDatabases] = useState(Array<model.Database>)
+	const [databases, setDatabases] = useState(Array<model.Database>);
 
 	useEffect(() => {
 		// Toast notification for database loading
 		toast({
 			title: "Loading databases",
 			description: "Fetching database information...",
-		})
+		});
 
 		ListDatabase()
 			.then((result) => {
-				console.log(result)
-				setDatabases(result || [])
-				console.log(databases)
+				console.log(result);
+				setDatabases(result || []);
+				console.log(databases);
 
 				// Success toast
 				toast({
@@ -46,28 +50,28 @@ export function NavDatabase({ connected }: { connected: boolean }) {
 						? `Successfully loaded ${result.length} databases`
 						: "No databases found or connection issue",
 					variant: "default",
-				})
+				});
 			})
 			.catch((err) => {
-				console.log(err)
+				console.log(err);
 
 				// Error toast
-				let errorMessage = "Failed to load databases"
+				let errorMessage = "Failed to load databases";
 				if (err instanceof Error) {
-					errorMessage = err.message
+					errorMessage = err.message;
 				} else if (typeof err === "string") {
-					errorMessage = err
+					errorMessage = err;
 				} else {
-					errorMessage = JSON.stringify(err)
+					errorMessage = JSON.stringify(err);
 				}
 
 				toast({
 					title: "Database loading error",
 					description: errorMessage,
 					variant: "destructive",
-				})
-			})
-	}, [])
+				});
+			});
+	}, []);
 	if (!connected) {
 		return (
 			<SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -84,7 +88,7 @@ export function NavDatabase({ connected }: { connected: boolean }) {
 					</div>
 				</SidebarMenu>
 			</SidebarGroup>
-		)
+		);
 	}
 	return (
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -124,5 +128,5 @@ export function NavDatabase({ connected }: { connected: boolean }) {
 				))}
 			</SidebarMenu>
 		</SidebarGroup>
-	)
+	);
 }
