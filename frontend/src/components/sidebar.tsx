@@ -6,11 +6,14 @@ import { NavProjects } from "@/components/nav-project"
 import { NavUser } from "@/components/nav-user"
 import { NavDatabase } from "@/components/nav-database"
 import { ConnectionSwitcher } from "@/components/connection-switcher"
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from "@/components/ui/sidebar"
+import { ConnectionListDialog } from "@/components/connection/connection-list-dialog"
+import {
+	Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+} from "@/components/ui/sidebar"
 import { model } from "../../wailsjs/go/models"
 import { Button } from "@/components/ui/button"
 import { Dispatch, SetStateAction } from "react"
-import { CornerLeftUp } from "lucide-react"
+import { CornerLeftUp, Cable } from "lucide-react"
 
 
 
@@ -152,6 +155,14 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ connections, refreshConnection, onSelectConnection, connected, ...props }: AppSidebarProps) {
+
+	let connectionListTrigger = <SidebarMenuButton onSelect={(e) => e.preventDefault()}>
+		<div className="flex size-6 items-center justify-center rounded-md border bg-background">
+			<Cable className="size-4" />
+		</div>
+		<div className="text-muted-foreground">Connections</div>
+	</SidebarMenuButton>
+
 	return (
 		<Sidebar
 			collapsible="icon"
@@ -170,7 +181,12 @@ export function AppSidebar({ connections, refreshConnection, onSelectConnection,
 				<NavProjects projects={data.projects} />
 			</SidebarContent>
 			<SidebarFooter>
-				<NavUser user={data.user} />
+				<SidebarMenu>
+					<SidebarMenuItem>
+						<ConnectionListDialog dialogTrigger={connectionListTrigger} />
+					</SidebarMenuItem>
+				</SidebarMenu>
+				{/* <NavUser user={data.user} /> */}
 			</SidebarFooter>
 			<SidebarRail />
 		</Sidebar>

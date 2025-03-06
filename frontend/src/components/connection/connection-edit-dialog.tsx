@@ -1,4 +1,9 @@
-import { Button } from "@/components/ui/button"
+import { useState } from 'react';
+import { useToast } from "@/hooks/use-toast"
+import { model } from '../../../wailsjs/go/models';
+import { z } from "zod"
+import { SetActiveConnection, UpdateConnection } from "../../../wailsjs/go/main/App";
+
 import {
     Dialog,
     DialogContent,
@@ -10,11 +15,8 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { z } from "zod"
-import { useState } from 'react';
-import { useToast } from "@/hooks/use-toast"
-import { model } from '../../wailsjs/go/models';
-import { SetActiveConnection, UpdateConnection } from "../../wailsjs/go/main/App";
+import { Button } from "@/components/ui/button"
+
 
 const validateSchema = z.object({
     uuid: z.string({}),
@@ -25,16 +27,10 @@ const validateSchema = z.object({
     port: z.coerce.number().refine((val) => `${val}`.length === 4, 'Port must be 4 digits long'),
 })
 
-export function EditConnectionDialog({
-    connection,
-    refreshDB,
-    dialogTrigger,
-    onUpdateSuccess
-}: {
-    connection: model.Connection
-    refreshDB: Function
-    dialogTrigger: JSX.Element
-    onUpdateSuccess?: (updatedConnection: model.Connection) => void
+export function ConnectionEditDialog({ dialogTrigger, callback, connection }: {
+    dialogTrigger: JSX.Element,
+    callback: Function,
+    connection: model.Connection,
 }) {
     const [open, setOpen] = useState(false);
     const { toast } = useToast()
@@ -88,12 +84,12 @@ export function EditConnectionDialog({
                     setOpen(false);
 
                     // Refresh the connection list
-                    refreshDB();
+                    callback();
 
-                    // Notify parent component
-                    if (onUpdateSuccess) {
-                        onUpdateSuccess(updatedConnection);
-                    }
+                    // // Notify parent component
+                    // if (onUpdateSuccess) {
+                    //     onUpdateSuccess(updatedConnection);
+                    // }
                 })
                 .catch((err: unknown) => {
                     let message = "Connection update failed";
@@ -120,12 +116,13 @@ export function EditConnectionDialog({
         }
     }
 
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {dialogTrigger}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle>Edit Connection</DialogTitle>
                     <DialogDescription>
@@ -204,4 +201,4 @@ export function EditConnectionDialog({
             </DialogContent>
         </Dialog>
     )
-} 
+}

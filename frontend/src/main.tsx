@@ -30,12 +30,12 @@ function ThemedApp() {
     return (
         <Theme appearance={theme}>
             <div id='theme-toggle' className="fixed top-4 right-4 z-50">
-                <Button 
-                    variant="soft" 
+                <Button
+                    variant="soft"
                     onClick={toggleTheme}
                 >
-                    {theme === 'dark' ? 
-                        <Sun size={16} className='text-white' /> : 
+                    {theme === 'dark' ?
+                        <Sun size={16} className='text-white' /> :
                         <Moon size={16} className='text-black' />
                     }
                 </Button>

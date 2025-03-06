@@ -97,9 +97,9 @@ export function ConnectionSwitcher({
                         {connections !== null && connections.length !== 0 ? connections.map((connection, index) => (
                             <div key={connection.name} className="flex">
                                 <DropdownMenuItem
-                                    onClick={() => { 
-                                        setActiveConnection(connection); 
-                                        onSelectConnection(connection); 
+                                    onClick={() => {
+                                        setActiveConnection(connection);
+                                        onSelectConnection(connection);
                                     }}
                                     className="flex-1 gap-2 p-2"
                                 >
@@ -119,9 +119,9 @@ export function ConnectionSwitcher({
                                                     onSelectConnection(updatedConnection);
                                                 }}
                                                 dialogTrigger={
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
                                                         className="h-8 w-8 mr-1 my-auto"
                                                         onClick={(e) => {
                                                             e.stopPropagation(); // Prevent triggering dropdown item click

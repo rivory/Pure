@@ -19,7 +19,7 @@ const (
 
 type ConnectionService struct {
 	ctx              context.Context
-	Conections       []model.Connection
+	Connections      []model.Connection
 	ActiveConnection *model.ActiveConnection
 }
 
@@ -43,11 +43,17 @@ func TestConnection(ctx context.Context, conn model.Connection) error {
 }
 
 func (c *ConnectionService) ListConnections() []model.Connection {
-	return c.Conections
+	return c.Connections
 }
 
 func (c *ConnectionService) AddConnection(name, username, password, host string, port int) error {
+	id := 1
+	if len(c.Connections) > 0 {
+		id = len(c.Connections) + 1
+	}
+
 	conn := model.Connection{
+		ID:       id,
 		Uuid:     uuid.New(),
 		Name:     name,
 		Type:     model.Postgres,
@@ -61,7 +67,7 @@ func (c *ConnectionService) AddConnection(name, username, password, host string,
 		return err
 	}
 
-	c.Conections = append(c.Conections, conn)
+	c.Connections = append(c.Connections, conn)
 	c.save()
 
 	return nil
@@ -76,9 +82,9 @@ func (c *ConnectionService) UpdateConnection(conn model.Connection) error {
 
 	// Find and update the connection in the list
 	found := false
-	for i, existingConn := range c.Conections {
+	for i, existingConn := range c.Connections {
 		if existingConn.Uuid == conn.Uuid {
-			c.Conections[i] = conn
+			c.Connections[i] = conn
 			found = true
 			break
 		}
@@ -114,7 +120,7 @@ func (c *ConnectionService) read() error {
 		return err
 	}
 
-	c.Conections = conns
+	c.Connections = conns
 
 	return nil
 }
@@ -125,7 +131,7 @@ func (c *ConnectionService) save() error {
 		return err
 	}
 
-	j, err := json.Marshal(c.Conections)
+	j, err := json.Marshal(c.Connections)
 	if err != nil {
 		return err
 	}
@@ -230,7 +236,7 @@ type QueryResult struct {
 func (c *ConnectionService) Query(connUUID string, query string) (*QueryResult, error) {
 	// Find the connection
 	var conn model.Connection
-	for _, c := range c.Conections {
+	for _, c := range c.Connections {
 		if c.Uuid.String() == connUUID {
 			conn = c
 			break
@@ -280,7 +286,7 @@ func (c *ConnectionService) Query(connUUID string, query string) (*QueryResult, 
 func (c *ConnectionService) ListTables(connUUID string) ([]string, error) {
 	// Find the connection
 	var conn model.Connection
-	for _, c := range c.Conections {
+	for _, c := range c.Connections {
 		if c.Uuid.String() == connUUID {
 			conn = c
 			break
@@ -328,7 +334,7 @@ type TableInfo struct {
 func (c *ConnectionService) GetTableInfo(connUUID string) ([]TableInfo, error) {
 	// Find the connection
 	var conn model.Connection
-	for _, c := range c.Conections {
+	for _, c := range c.Connections {
 		if c.Uuid.String() == connUUID {
 			conn = c
 			break

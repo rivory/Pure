@@ -15,6 +15,7 @@ const (
 )
 
 type Connection struct {
+	ID       int            `json:"id"`
 	Uuid     uuid.UUID      `json:"uuid"`
 	Name     string         `json:"name"`
 	Type     ConnectionType `json:"type"`
