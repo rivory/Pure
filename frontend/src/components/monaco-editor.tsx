@@ -1,6 +1,6 @@
-import Editor, { OnChange, type OnMount } from "@monaco-editor/react";
-import * as monaco from "monaco-editor";
 import React from "react";
+import Editor, { OnChange, OnMount } from "@monaco-editor/react";
+import * as monaco from 'monaco-editor';
 // import { tableSchema } from "./tableSchema1";
 // import * as B from "@mobily/ts-belt";
 
@@ -13,8 +13,7 @@ import React from "react";
 // const schemaTableNamesSet = new Set(schemaTableNames);
 
 function parseSqlAndFindTableNameAndAliases(sql: string) {
-    const regex =
-        /\b(?:FROM|JOIN)\s+([^\s.]+(?:\.[^\s.]+)?)\s*(?:AS)?\s*([^\s,]+)?/gi;
+    const regex = /\b(?:FROM|JOIN)\s+([^\s.]+(?:\.[^\s.]+)?)\s*(?:AS)?\s*([^\s,]+)?/gi;
     const tables = [];
 
     while (true) {
@@ -31,7 +30,7 @@ function parseSqlAndFindTableNameAndAliases(sql: string) {
             }
             tables.push({
                 table_name,
-                alias: alias || table_name,
+                alias: alias || table_name
             });
         }
     }
@@ -47,58 +46,52 @@ interface MonacoEditorProps {
 class MonacoEditor extends React.Component<MonacoEditorProps> {
     // private editor?: monaco.editor.IStandaloneCodeEditor;
 
+
     handleEditorDidMount: OnMount = (editor, monaco) => {
         // this.editor = editor;
         editor.focus();
 
         monaco.languages.registerCompletionItemProvider("*", {
-            provideCompletionItems: (
-                model,
-                position,
-                context,
-                cancelationToken,
-            ) => {
+            provideCompletionItems: (model, position, context, cancelationToken,) => {
                 // const monaco = useMonaco();
                 var word = model.getWordUntilPosition(position);
                 var range = {
                     startLineNumber: position.lineNumber,
                     endLineNumber: position.lineNumber,
-                    startColumn: word.startColumn, // - 1, // UNCOMMENT THIS AND IT BREAKS
-                    endColumn: word.endColumn,
+                    startColumn: word.startColumn,// - 1, // UNCOMMENT THIS AND IT BREAKS
+                    endColumn: word.endColumn
                 };
 
-                const suggestions: monaco.languages.CompletionItem[] = [
+                let suggestions: monaco.languages.CompletionItem[] = [
                     {
                         label: "myCustomSnippet",
                         kind: monaco.languages.CompletionItemKind.Snippet,
                         insertText: "This is a piece of custom code",
                         insertTextRules:
-                            monaco.languages.CompletionItemInsertTextRule
-                                .InsertAsSnippet,
+                            monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                         documentation: "This is a piece of custom code",
                         range: range,
-                    },
+                    }
                 ];
 
                 const fullQueryText = model.getValue();
 
                 const tableNamesAndAliases = new Map(
-                    parseSqlAndFindTableNameAndAliases(fullQueryText).map(
-                        ({ table_name, alias }) => [alias, table_name],
-                    ),
+                    parseSqlAndFindTableNameAndAliases(
+                        fullQueryText
+                    ).map(({ table_name, alias }) => [alias, table_name])
                 );
 
                 const thisLine = model.getValueInRange({
                     startLineNumber: position.lineNumber,
                     startColumn: 1,
                     endLineNumber: position.lineNumber,
-                    endColumn: position.column,
+                    endColumn: position.column
                 });
-                const thisToken =
-                    thisLine.trim().split(" ").slice(-1)?.[0] || "";
+                const thisToken = thisLine.trim().split(" ").slice(-1)?.[0] || "";
 
                 const lastTokenBeforeSpace = /\s?(\w+)\s+\w+$/.exec(
-                    thisLine.trim(),
+                    thisLine.trim()
                 )?.[1];
                 const lastTokenBeforeDot = /(\w+)\.\w*$/.exec(thisToken)?.[1];
 
@@ -106,7 +99,7 @@ class MonacoEditor extends React.Component<MonacoEditorProps> {
                     tableNamesAndAliases,
                     thisToken,
                     lastTokenBeforeSpace,
-                    lastTokenBeforeDot,
+                    lastTokenBeforeDot
                 );
 
                 // if (
@@ -126,11 +119,9 @@ class MonacoEditor extends React.Component<MonacoEditorProps> {
                     let table_name = null as string | null;
                     // if (schemaTableNamesSet.has(lastTokenBeforeDot)) {
                     //     table_name = lastTokenBeforeDot;
-                    // } else
+                    // } else 
                     if (tableNamesAndAliases.get(lastTokenBeforeDot)) {
-                        table_name = tableNamesAndAliases.get(
-                            lastTokenBeforeDot,
-                        ) as string;
+                        table_name = tableNamesAndAliases.get(lastTokenBeforeDot) as string;
                     }
                     // if (table_name) {
                     //     suggestions.push(
@@ -147,11 +138,11 @@ class MonacoEditor extends React.Component<MonacoEditorProps> {
 
                 return {
                     // suggestions: B.pipe(
-                    suggestions,
+                    suggestions
                     // B.A.uniqBy((s) => s.insertText)
                     // )
                 };
-            },
+            }
         });
     };
 
