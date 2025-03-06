@@ -5,11 +5,11 @@ import { model } from "../models";
 import { context } from "../models";
 
 export function AddConnection(
-  arg1: string,
-  arg2: string,
-  arg3: string,
-  arg4: string,
-  arg5: number,
+    arg1: string,
+    arg2: string,
+    arg3: string,
+    arg4: string,
+    arg5: number,
 ): Promise<void>;
 
 export function GetTableInfo(arg1: string): Promise<Array<backend.TableInfo>>;
