@@ -37,8 +37,16 @@ export default function Page() {
 
 	// Fonction pour ajouter un nouvel onglet
 	const addNewTab = useCallback(() => {
-		const newId = String(tabs.length + 1)
+		// Find the next available query number
+		const usedNumbers = tabs.map(tab => {
+			const match = tab.title.match(/Query (\d+)/)
+			return match ? parseInt(match[1], 10) : 0
+		})
+		const nextNumber = Math.max(...usedNumbers, 0) + 1
+		
+		const newId = String(nextNumber)
 		const newTitle = `Query ${newId}`
+		
 		setTabs((prevTabs) => [
 			...prevTabs,
 			{
@@ -51,7 +59,7 @@ export default function Page() {
 			},
 		])
 		setActiveTab(newId)
-	}, [tabs.length])
+	}, [tabs])
 
 	// Gestionnaire d'événements pour le raccourci Cmd+T
 	useEffect(() => {
