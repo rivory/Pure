@@ -21,30 +21,34 @@ export default function Page() {
 	const [selectedConnection, setSelectedConnection] = useState<model.Connection>()
 	const [connected, setConnected] = useState(false)
 
-
 	const [activeTab, setActiveTab] = useState("1")
-	const [tabs, setTabs] = useState<Tab[]>([{
-		id: "1",
-		title: "Query 1",
-		queryState: {
-			queryText: "",
-			results: null
-		}
-	}])
+	const [tabs, setTabs] = useState<Tab[]>([
+		{
+			id: "1",
+			title: "Query 1",
+			queryState: {
+				queryText: "",
+				results: null,
+			},
+		},
+	])
 	const [tables, setTables] = useState<TableInfo[]>([])
 
 	// Fonction pour ajouter un nouvel onglet
 	const addNewTab = useCallback(() => {
 		const newId = String(tabs.length + 1)
 		const newTitle = `Query ${newId}`
-		setTabs((prevTabs) => [...prevTabs, {
-			id: newId,
-			title: newTitle,
-			queryState: {
-				queryText: "",
-				results: null
-			}
-		}])
+		setTabs((prevTabs) => [
+			...prevTabs,
+			{
+				id: newId,
+				title: newTitle,
+				queryState: {
+					queryText: "",
+					results: null,
+				},
+			},
+		])
 		setActiveTab(newId)
 	}, [tabs.length])
 
@@ -52,18 +56,18 @@ export default function Page() {
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			// Cmd+T sur Mac (ou Ctrl+T sur Windows/Linux)
-			if ((e.metaKey || e.ctrlKey) && e.key === 't') {
+			if ((e.metaKey || e.ctrlKey) && e.key === "t") {
 				e.preventDefault() // Empêcher le comportement par défaut du navigateur
 				addNewTab()
 			}
 		}
 
 		// Ajouter l'écouteur d'événement
-		window.addEventListener('keydown', handleKeyDown)
+		window.addEventListener("keydown", handleKeyDown)
 
 		// Supprimer l'écouteur d'événement à la destruction du composant
 		return () => {
-			window.removeEventListener('keydown', handleKeyDown)
+			window.removeEventListener("keydown", handleKeyDown)
 		}
 	}, [addNewTab])
 
@@ -122,15 +126,18 @@ export default function Page() {
 		refreshConnection()
 	}, [])
 
-
 	return (
 		<div>
-			<div className="w-full bg-primary text-primary-foreground py-1 text-center text-sm"
+			<div
+				className="w-full py-1 text-center text-sm dark:bg-black dark:text-white bg-white text-black"
 				style={
 					{
-						"--wails-draggable": "drag"
+						"--wails-draggable": "drag",
 					} as React.CSSProperties
-				}>top bar</div>
+				}
+			>
+				top bar
+			</div>
 			<SidebarProvider>
 				<AppSidebar
 					connections={connections}
@@ -159,9 +166,7 @@ export default function Page() {
 								<Breadcrumb>
 									<BreadcrumbList>
 										<BreadcrumbItem className="hidden md:block">
-											<BreadcrumbLink href="#">
-												Queries
-											</BreadcrumbLink>
+											<BreadcrumbLink href="#">Queries</BreadcrumbLink>
 										</BreadcrumbItem>
 										<BreadcrumbSeparator className="hidden md:block" />
 										<BreadcrumbItem>

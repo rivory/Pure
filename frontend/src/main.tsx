@@ -29,7 +29,7 @@ function ThemedApp() {
 
     return (
         <Theme appearance={theme}>
-            <div id='theme-toggle' className="fixed top-4 right-4 z-50">
+            <div id='theme-toggle' className="fixed top-8 right-4 z-50">
                 <Button
                     variant="soft"
                     onClick={toggleTheme}
