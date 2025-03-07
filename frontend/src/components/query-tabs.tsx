@@ -39,7 +39,14 @@ export function QueryTabs({
 		if (onAddTab) {
 			onAddTab();
 		} else {
-			const newId = String(tabs.length + 1);
+			// Find the next available query number
+			const usedNumbers = tabs.map(tab => {
+				const match = tab.title.match(/Query (\d+)/)
+				return match ? parseInt(match[1], 10) : 0
+			})
+			const nextNumber = Math.max(...usedNumbers, 0) + 1
+			
+			const newId = String(nextNumber);
 			const newTitle = `Query ${newId}`;
 			onTabsChange([
 				...tabs,

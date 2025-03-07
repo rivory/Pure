@@ -167,6 +167,7 @@ export function AppSidebar({ connections, refreshConnection, onSelectConnection,
 		<Sidebar
 			collapsible="icon"
 			variant="floating"
+			className="pt-8"
 		>
 			<SidebarHeader>
 				<ConnectionSwitcher

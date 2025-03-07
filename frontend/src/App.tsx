@@ -20,51 +20,70 @@ export default function Page() {
 	const { toast } = useToast()
 	const [selectedConnection, setSelectedConnection] = useState<model.Connection>()
 	const [connected, setConnected] = useState(false)
-
+	const [isSearchVisible, setIsSearchVisible] = useState(false)
 
 	const [activeTab, setActiveTab] = useState("1")
-	const [tabs, setTabs] = useState<Tab[]>([{
-		id: "1",
-		title: "Query 1",
-		queryState: {
-			queryText: "",
-			results: null
-		}
-	}])
+	const [tabs, setTabs] = useState<Tab[]>([
+		{
+			id: "1",
+			title: "Query 1",
+			queryState: {
+				queryText: "",
+				results: null,
+			},
+		},
+	])
 	const [tables, setTables] = useState<TableInfo[]>([])
 
 	// Fonction pour ajouter un nouvel onglet
 	const addNewTab = useCallback(() => {
-		const newId = String(tabs.length + 1)
+		// Find the next available query number
+		const usedNumbers = tabs.map(tab => {
+			const match = tab.title.match(/Query (\d+)/)
+			return match ? parseInt(match[1], 10) : 0
+		})
+		const nextNumber = Math.max(...usedNumbers, 0) + 1
+		
+		const newId = String(nextNumber)
 		const newTitle = `Query ${newId}`
-		setTabs((prevTabs) => [...prevTabs, {
-			id: newId,
-			title: newTitle,
-			queryState: {
-				queryText: "",
-				results: null
-			}
-		}])
+		
+		setTabs((prevTabs) => [
+			...prevTabs,
+			{
+				id: newId,
+				title: newTitle,
+				queryState: {
+					queryText: "",
+					results: null,
+				},
+			},
+		])
 		setActiveTab(newId)
-	}, [tabs.length])
+	}, [tabs])
 
 	// TODO: move this into a shortcut file maybe where we declare all shortcuts ? 
 	// Gestionnaire d'événements pour le raccourci Cmd+T
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			// Cmd+T sur Mac (ou Ctrl+T sur Windows/Linux)
-			if ((e.metaKey || e.ctrlKey) && e.key === 't') {
+			if ((e.metaKey || e.ctrlKey) && e.key === "t") {
 				e.preventDefault() // Empêcher le comportement par défaut du navigateur
 				addNewTab()
+			}
+			
+			// Cmd+K pour activer/désactiver le champ de recherche
+			if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+				e.preventDefault()
+				setIsSearchVisible(prev => !prev)
 			}
 		}
 
 		// Ajouter l'écouteur d'événement
-		window.addEventListener('keydown', handleKeyDown)
+		window.addEventListener("keydown", handleKeyDown)
 
 		// Supprimer l'écouteur d'événement à la destruction du composant
 		return () => {
-			window.removeEventListener('keydown', handleKeyDown)
+			window.removeEventListener("keydown", handleKeyDown)
 		}
 	}, [addNewTab])
 
@@ -123,80 +142,102 @@ export default function Page() {
 		refreshConnection()
 	}, [])
 
-
 	return (
-		<SidebarProvider>
-			<AppSidebar
-				connections={connections}
-				refreshConnection={refreshConnection}
-				onSelectConnection={setSelectedConnection}
-				connected={connected}
-			/>
+		<div>
 			<div
-				id="content"
-				className={cn(
-					"max-w-full w-full ml-auto",
-					"peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon))]",
-					"peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]",
-					"transition-[width] ease-linear duration-200",
-					"h-svh flex flex-col",
-				)}
+				className="w-full py-1 text-center text-sm dark:bg-black dark:text-white bg-white text-black flex items-center justify-center"
+				style={
+					{
+						"--wails-draggable": "drag",
+					} as React.CSSProperties
+				}
 			>
-				<SidebarInset>
-					<header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-						<div className="flex items-center gap-2 px-4">
-							<SidebarTrigger className="-ml-1" />
-							<Separator
-								orientation="vertical"
-								className="mr-2 h-4"
-							/>
-							<Breadcrumb>
-								<BreadcrumbList>
-									<BreadcrumbItem className="hidden md:block">
-										<BreadcrumbLink href="#">
-											Queries
-										</BreadcrumbLink>
-									</BreadcrumbItem>
-									<BreadcrumbSeparator className="hidden md:block" />
-									<BreadcrumbItem>
-										<Select
-											value={activeTab}
-											onValueChange={setActiveTab}
-										>
-											<SelectTrigger className="h-8 w-[200px]">
-												<SelectValue placeholder="Select a query" />
-											</SelectTrigger>
-											<SelectContent>
-												{tabs.map((tab) => (
-													<SelectItem
-														key={tab.id}
-														value={tab.id}
-													>
-														{tab.title}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-									</BreadcrumbItem>
-								</BreadcrumbList>
-							</Breadcrumb>
-						</div>
-					</header>
-					<div className="flex flex-1 flex-col gap-4 p-2 pt-0">
-						<div className="flex-1 rounded-xl bg-muted/50 md:min-h-min">
-							<QueryTabs
-								selectedConnection={selectedConnection}
-								activeTab={activeTab}
-								onActiveTabChange={setActiveTab}
-								tabs={tabs}
-								onTabsChange={(newTabs) => setTabs(newTabs)}
-								onAddTab={addNewTab}
-							/>
-						</div>
+				{isSearchVisible ? (
+					<div className="max-w-md w-full px-4" onClick={(e) => e.stopPropagation()}>
+						<input
+							type="text"
+							placeholder="Rechercher..."
+							className="w-full px-3 py-1 rounded border dark:border-gray-700 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+							autoFocus
+							onBlur={() => setIsSearchVisible(false)}
+							onClick={(e) => e.stopPropagation()}
+						/>
 					</div>
-				</SidebarInset>
-				<Toaster />
+				) : (
+					<span>Appuyez sur Cmd+K pour rechercher</span>
+				)}
 			</div>
-		</SidebarProvider>
+			<SidebarProvider>
+				<AppSidebar
+					connections={connections}
+					refreshConnection={refreshConnection}
+					onSelectConnection={setSelectedConnection}
+					connected={connected}
+				/>
+				<div
+					id="content"
+					className={cn(
+						"max-w-full w-full ml-auto",
+						"peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon))]",
+						"peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]",
+						"transition-[width] ease-linear duration-200",
+						"h-svh flex flex-col",
+					)}
+				>
+					<SidebarInset>
+						<header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+							<div className="flex items-center gap-2 px-4">
+								<SidebarTrigger className="-ml-1" />
+								<Separator
+									orientation="vertical"
+									className="mr-2 h-4"
+								/>
+								<Breadcrumb>
+									<BreadcrumbList>
+										<BreadcrumbItem className="hidden md:block">
+											<BreadcrumbLink href="#">Queries</BreadcrumbLink>
+										</BreadcrumbItem>
+										<BreadcrumbSeparator className="hidden md:block" />
+										<BreadcrumbItem>
+											<Select
+												value={activeTab}
+												onValueChange={setActiveTab}
+											>
+												<SelectTrigger className="h-8 w-[200px]">
+													<SelectValue placeholder="Select a query" />
+												</SelectTrigger>
+												<SelectContent>
+													{tabs.map((tab) => (
+														<SelectItem
+															key={tab.id}
+															value={tab.id}
+														>
+															{tab.title}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										</BreadcrumbItem>
+									</BreadcrumbList>
+								</Breadcrumb>
+							</div>
+						</header>
+						<div className="flex flex-1 flex-col gap-4 p-2 pt-0">
+							<div className="flex-1 rounded-xl bg-muted/50 md:min-h-min">
+								<QueryTabs
+									selectedConnection={selectedConnection}
+									activeTab={activeTab}
+									onActiveTabChange={setActiveTab}
+									tabs={tabs}
+									onTabsChange={(newTabs) => setTabs(newTabs)}
+									onAddTab={addNewTab}
+								/>
+							</div>
+						</div>
+					</SidebarInset>
+					<Toaster />
+				</div>
+			</SidebarProvider>
+		</div>
 	)
 }
