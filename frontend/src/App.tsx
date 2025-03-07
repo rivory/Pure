@@ -20,6 +20,7 @@ export default function Page() {
 	const { toast } = useToast()
 	const [selectedConnection, setSelectedConnection] = useState<model.Connection>()
 	const [connected, setConnected] = useState(false)
+	const [isSearchVisible, setIsSearchVisible] = useState(false)
 
 	const [activeTab, setActiveTab] = useState("1")
 	const [tabs, setTabs] = useState<Tab[]>([
@@ -59,6 +60,12 @@ export default function Page() {
 			if ((e.metaKey || e.ctrlKey) && e.key === "t") {
 				e.preventDefault() // Empêcher le comportement par défaut du navigateur
 				addNewTab()
+			}
+			
+			// Cmd+K pour activer/désactiver le champ de recherche
+			if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+				e.preventDefault()
+				setIsSearchVisible(prev => !prev)
 			}
 		}
 
@@ -129,14 +136,27 @@ export default function Page() {
 	return (
 		<div>
 			<div
-				className="w-full py-1 text-center text-sm dark:bg-black dark:text-white bg-white text-black"
+				className="w-full py-1 text-center text-sm dark:bg-black dark:text-white bg-white text-black flex items-center justify-center"
 				style={
 					{
 						"--wails-draggable": "drag",
 					} as React.CSSProperties
 				}
 			>
-				top bar
+				{isSearchVisible ? (
+					<div className="max-w-md w-full px-4" onClick={(e) => e.stopPropagation()}>
+						<input
+							type="text"
+							placeholder="Rechercher..."
+							className="w-full px-3 py-1 rounded border dark:border-gray-700 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+							autoFocus
+							onBlur={() => setIsSearchVisible(false)}
+							onClick={(e) => e.stopPropagation()}
+						/>
+					</div>
+				) : (
+					<span>Appuyez sur Cmd+K pour rechercher</span>
+				)}
 			</div>
 			<SidebarProvider>
 				<AppSidebar
