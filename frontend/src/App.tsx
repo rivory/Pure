@@ -124,78 +124,86 @@ export default function Page() {
 
 
 	return (
-		<SidebarProvider>
-			<AppSidebar
-				connections={connections}
-				refreshConnection={refreshConnection}
-				onSelectConnection={setSelectedConnection}
-				connected={connected}
-			/>
-			<div
-				id="content"
-				className={cn(
-					"max-w-full w-full ml-auto",
-					"peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon))]",
-					"peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]",
-					"transition-[width] ease-linear duration-200",
-					"h-svh flex flex-col",
-				)}
-			>
-				<SidebarInset>
-					<header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-						<div className="flex items-center gap-2 px-4">
-							<SidebarTrigger className="-ml-1" />
-							<Separator
-								orientation="vertical"
-								className="mr-2 h-4"
-							/>
-							<Breadcrumb>
-								<BreadcrumbList>
-									<BreadcrumbItem className="hidden md:block">
-										<BreadcrumbLink href="#">
-											Queries
-										</BreadcrumbLink>
-									</BreadcrumbItem>
-									<BreadcrumbSeparator className="hidden md:block" />
-									<BreadcrumbItem>
-										<Select
-											value={activeTab}
-											onValueChange={setActiveTab}
-										>
-											<SelectTrigger className="h-8 w-[200px]">
-												<SelectValue placeholder="Select a query" />
-											</SelectTrigger>
-											<SelectContent>
-												{tabs.map((tab) => (
-													<SelectItem
-														key={tab.id}
-														value={tab.id}
-													>
-														{tab.title}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-									</BreadcrumbItem>
-								</BreadcrumbList>
-							</Breadcrumb>
+		<div>
+			<div className="w-full bg-primary text-primary-foreground py-1 text-center text-sm"
+				style={
+					{
+						"--wails-draggable": "drag"
+					} as React.CSSProperties
+				}>top bar</div>
+			<SidebarProvider>
+				<AppSidebar
+					connections={connections}
+					refreshConnection={refreshConnection}
+					onSelectConnection={setSelectedConnection}
+					connected={connected}
+				/>
+				<div
+					id="content"
+					className={cn(
+						"max-w-full w-full ml-auto",
+						"peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon))]",
+						"peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]",
+						"transition-[width] ease-linear duration-200",
+						"h-svh flex flex-col",
+					)}
+				>
+					<SidebarInset>
+						<header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+							<div className="flex items-center gap-2 px-4">
+								<SidebarTrigger className="-ml-1" />
+								<Separator
+									orientation="vertical"
+									className="mr-2 h-4"
+								/>
+								<Breadcrumb>
+									<BreadcrumbList>
+										<BreadcrumbItem className="hidden md:block">
+											<BreadcrumbLink href="#">
+												Queries
+											</BreadcrumbLink>
+										</BreadcrumbItem>
+										<BreadcrumbSeparator className="hidden md:block" />
+										<BreadcrumbItem>
+											<Select
+												value={activeTab}
+												onValueChange={setActiveTab}
+											>
+												<SelectTrigger className="h-8 w-[200px]">
+													<SelectValue placeholder="Select a query" />
+												</SelectTrigger>
+												<SelectContent>
+													{tabs.map((tab) => (
+														<SelectItem
+															key={tab.id}
+															value={tab.id}
+														>
+															{tab.title}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										</BreadcrumbItem>
+									</BreadcrumbList>
+								</Breadcrumb>
+							</div>
+						</header>
+						<div className="flex flex-1 flex-col gap-4 p-2 pt-0">
+							<div className="flex-1 rounded-xl bg-muted/50 md:min-h-min">
+								<QueryTabs
+									selectedConnection={selectedConnection}
+									activeTab={activeTab}
+									onActiveTabChange={setActiveTab}
+									tabs={tabs}
+									onTabsChange={(newTabs) => setTabs(newTabs)}
+									onAddTab={addNewTab}
+								/>
+							</div>
 						</div>
-					</header>
-					<div className="flex flex-1 flex-col gap-4 p-2 pt-0">
-						<div className="flex-1 rounded-xl bg-muted/50 md:min-h-min">
-							<QueryTabs
-								selectedConnection={selectedConnection}
-								activeTab={activeTab}
-								onActiveTabChange={setActiveTab}
-								tabs={tabs}
-								onTabsChange={(newTabs) => setTabs(newTabs)}
-								onAddTab={addNewTab}
-							/>
-						</div>
-					</div>
-				</SidebarInset>
-				<Toaster />
-			</div>
-		</SidebarProvider>
+					</SidebarInset>
+					<Toaster />
+				</div>
+			</SidebarProvider>
+		</div>
 	)
 }
