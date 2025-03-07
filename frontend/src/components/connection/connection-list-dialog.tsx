@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { model } from "../../../wailsjs/go/models"
-import { ListConnections, } from "../../../wailsjs/go/main/App"
+import { ListConnections, SetActiveConnection } from "../../../wailsjs/go/main/App"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 import { ConnectionAddDialog } from './connection-add-dialog';
 import { ConnectionEditDialog } from './connection-edit-dialog';
 
-import { ChevronRight, PlugZap, Database, SquarePen, Pencil, Trash2 } from "lucide-react"
+import { PlugZap, Pencil, Trash2 } from "lucide-react"
 import {
     Dialog,
     DialogContent,
@@ -64,15 +64,23 @@ export function ConnectionListDialog({ dialogTrigger }: { dialogTrigger: JSX.Ele
 
 
 
-    // TODO: set active connection in backend and close modal
     const onItemClick = (item: model.Connection) => {
         console.log(`Clicked: ${item.name}`)
+        SetActiveConnection(item)
+            .then(() => {
+                console.log("connected to db ")
+                setOpen(false)
+            })
+            .catch((err) => {
+                console.error(err) // TODO: better error handling
+                toast({
+                    title: "Error setting active connections",
+                    description: err instanceof Error ? err.message : "An error occurred",
+                    variant: "destructive",
+                })
+            })
     }
 
-    // TODO: edit item
-    const onEditItem = (item: model.Connection) => {
-        console.log(`Edit: ${item.name}`)
-    }
 
     // TODO: delete item
     const onDeleteItem = (item: model.Connection) => {

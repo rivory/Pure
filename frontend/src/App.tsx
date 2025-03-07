@@ -48,6 +48,7 @@ export default function Page() {
 		setActiveTab(newId)
 	}, [tabs.length])
 
+	// TODO: move this into a shortcut file maybe where we declare all shortcuts ? 
 	// Gestionnaire d'événements pour le raccourci Cmd+T
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
