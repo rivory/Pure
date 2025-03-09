@@ -42,6 +42,10 @@ export function Startup(arg1) {
   return window['go']['main']['App']['Startup'](arg1);
 }
 
+export function TitleBarPressedDouble() {
+  return window['go']['main']['App']['TitleBarPressedDouble']();
+}
+
 export function UpdateConnection(arg1) {
   return window['go']['main']['App']['UpdateConnection'](arg1);
 }

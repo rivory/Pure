@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { model } from "../wailsjs/go/models"
-import { ListConnections, GetTableInfo, SetActiveConnection } from "../wailsjs/go/main/App"
+import { ListConnections, GetTableInfo, SetActiveConnection, TitleBarPressedDouble } from "../wailsjs/go/main/App"
 import { AppSidebar } from "@/components/sidebar"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
@@ -151,6 +151,9 @@ export default function Page() {
 						"--wails-draggable": "drag",
 					} as React.CSSProperties
 				}
+				onDoubleClick={() => {
+					TitleBarPressedDouble();
+				}}
 			>
 				{isSearchVisible ? (
 					<div className="max-w-md w-full px-4" onClick={(e) => e.stopPropagation()}>
