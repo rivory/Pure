@@ -24,4 +24,6 @@ export function SetActiveConnection(arg1:model.Connection):Promise<void>;
 
 export function Startup(arg1:context.Context):Promise<void>;
 
+export function TitleBarPressedDouble():Promise<void>;
+
 export function UpdateConnection(arg1:model.Connection):Promise<void>;

@@ -167,7 +167,7 @@ export function AppSidebar({ connections, refreshConnection, onSelectConnection,
 		<Sidebar
 			collapsible="icon"
 			variant="floating"
-			className="pt-8"
+			className="overflow-hidden mt-[25px] h-auto"
 		>
 			<SidebarHeader>
 				<ConnectionSwitcher
@@ -179,7 +179,7 @@ export function AppSidebar({ connections, refreshConnection, onSelectConnection,
 			<SidebarContent>
 				<NavDatabase connected={connected} />
 				<NavMain items={data.navMain} />
-				<NavProjects projects={data.projects} />
+				{/* <NavProjects projects={data.projects} /> */}
 			</SidebarContent>
 			<SidebarFooter>
 				<SidebarMenu>
