@@ -43,10 +43,10 @@ export default function Page() {
 			return match ? parseInt(match[1], 10) : 0
 		})
 		const nextNumber = Math.max(...usedNumbers, 0) + 1
-		
+
 		const newId = String(nextNumber)
 		const newTitle = `Query ${newId}`
-		
+
 		setTabs((prevTabs) => [
 			...prevTabs,
 			{
@@ -70,7 +70,7 @@ export default function Page() {
 				e.preventDefault() // Empêcher le comportement par défaut du navigateur
 				addNewTab()
 			}
-			
+
 			// Cmd+K pour activer/désactiver le champ de recherche
 			if ((e.metaKey || e.ctrlKey) && e.key === "k") {
 				e.preventDefault()
@@ -145,7 +145,7 @@ export default function Page() {
 	return (
 		<div>
 			<div
-				className="w-full py-1 text-center text-sm dark:bg-black dark:text-white bg-white text-black flex items-center justify-center"
+				className="w-full size-9 py-1 text-center text-sm dark:bg-black dark:text-white bg-white text-black flex items-center justify-center"
 				style={
 					{
 						"--wails-draggable": "drag",
