@@ -1,0 +1,5 @@
+requests>=2.32
+pydantic>=2.7
+beautifulsoup4>=4.12  # optional (for remote catalog scraping)
+langchain>=0.2
+langchain-ollama>=0.1.0

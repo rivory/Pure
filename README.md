@@ -68,8 +68,14 @@ docker exec -i pg psql -U postgres < dump.sql
 
 To build a redistributable, production mode package:
 
+install
 ```bash
 wails build
+```
+
+Ubuntu 20.04
+```bash
+wails build -tags webkit2_41.
 ```
 
 
@@ -113,3 +119,145 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ### Future Improvements
 - Collaboration Features: Allow multiple users to collaborate on database queries and share saved queries with teammates.
 - Customizable Themes: Provide users with the ability to choose or create custom themes for the UI.
+
+
+
+## Python backend
+
+Here’s a clear, copy-ready **README.md** section you can drop in your repo (for your `llm` folder or main project).
+It explains how to install Ollama, set up the Python environment, and test your CLI.
+
+---
+
+# LLM Module Setup Guide
+
+This guide explains how to install and run the local **Ollama** server, configure your **Python environment**, and use the **CLI** to interact with the models.
+
+---
+
+## 1 Install Ollama
+
+### Linux / macOS
+
+Run the official install script:
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+```bash
+ollama --version
+```
+
+---
+
+## 2 Start the Ollama Server
+
+Ollama must be running to serve LLM requests on port **11434**.
+
+### Option A — Foreground (debug)
+
+```bash
+ollama serve
+```
+
+### Option B — Background
+
+```bash
+ollama serve > /tmp/ollama.log 2>&1 &
+```
+
+Check it’s working:
+
+```bash
+curl http://127.0.0.1:11434/api/tags
+```
+
+You should get a JSON response like:
+
+```json
+{"models":[{"name":"llama3.2:3b","details":{...}}]}
+```
+
+> Keep Ollama running while using the Python client or CLI.
+
+---
+
+## 3 Pull at least one model
+
+Download a model (for example, **Llama 3.2 3B**):
+
+```bash
+ollama pull llama3.2:3b
+```
+
+You can list all available models:
+
+```bash
+ollama list
+```
+
+or browse online: [https://ollama.com/library](https://ollama.com/library)
+
+---
+
+## 4 Set up the Python environment
+
+In your project root:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate        # Linux / macOS
+# or: .venv\Scripts\activate     # Windows PowerShell
+```
+
+Then install dependencies for the LLM client:
+
+```bash
+pip install -r llm/requirements.txt
+```
+
+> The `requirements.txt` file includes `requests`, `pydantic`, `langchain`, and `langchain-ollama`.
+
+To verify everything installed:
+
+```bash
+python -m pip list
+```
+
+---
+
+## 5 Test the CLI
+
+Run from the project root (while Ollama is running):
+
+### 6 List local models
+
+```bash
+python -m llm.cli list-local
+```
+
+### List remote
+
+```bash
+python -m llm.cli list-remote
+```
+
+### Pull a model
+
+```bash
+python -m llm.cli pull llama3.2:3b
+```
+
+### Generate text
+
+```bash
+python -m llm.cli generate llama3.2:3b "Write a 1-line SQL tip." --stream
+```
+
+### Chat with a model
+
+```bash
+python -m llm.cli chat llama3.2:3b "Explain what an index does in SQL."
+```
+
