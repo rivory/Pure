@@ -86,7 +86,7 @@ def main():
     s4.set_defaults(func=cmd_generate)
 
     s5 = sub.add_parser("chat", help="Single-turn chat")
-    s5.add_argument("model", help="e.g., llama3.2:3b")
+    s5.add_argument("model", help="e.gdeepseek-coder:1.3b")
     s5.add_argument("message", help="User message")
     s5.add_argument("--system", help="Optional system prompt")
     s5.add_argument("--stream", action="store_true")
